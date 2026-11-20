@@ -4,7 +4,7 @@ Honest reviews of what you pour and what you wear. Whiskey and fragrance reviews
 
 The site is built with [Astro](https://astro.build/) and published as plain static pages. The design and build plan live in `docs/superpowers/`.
 
-**Status:** under construction. The foundation, the content format and the authoring commands are in place. The designed pages are being built milestone by milestone (see the plan).
+**Status:** under construction. The gateway, both world homepages, the shelf, review pages, rundown pages and browse pages are built. Still to come: the About page, feeds, sharing cards, analytics and the photo command (see the plan).
 
 ## Run it on your computer
 

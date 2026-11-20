@@ -89,3 +89,20 @@ Done when: the gateway matches the approved board, works with the image blocked,
 - **The site is empty at launch.** Draft samples never publish, so the gateway's "latest" lists and the shelf need a designed empty state until the first real reviews are added. Included in tasks 20, 21 and 25.
 - **Outlining the logo typeface** depends on a font-to-path tool working in the build workspace. Fallback: load that one typeface for the logo only.
 - **Bottle photos** shot on light or busy backgrounds will not blend. The photo script will warn when the background is too bright.
+
+## Build notes (changes made while building)
+
+Status on 2026-11-20: M0 to M6 are built and live on the preview address. M7 and M8 remain.
+
+- **Tests** use Node's built-in test runner. The build workspace cannot install packages, so every push is built and checked by GitHub Actions, and pages are reviewed from the published `gh-pages` branch.
+- **Deploy** publishes `dist` to the `gh-pages` branch (Pages set to "Deploy from a branch"). The repository is public.
+- **Preview drafts.** The workflow sets `PUBLIC_SHOW_DRAFTS=true` so the nine sample entries show on the preview site with a banner and `noindex`. Remove that line at launch.
+- **Task 7, outlined logo.** Not done: no font-to-path tool is available. The seal, wordmark and gateway captions use the Cormorant Garamond webfont (the planned fallback).
+- **`shortName`.** Reviews have an optional short name (16 characters at most) for narrow rundown columns.
+- **Rundown profile comparison** only lists accords or flavors that at least two of the bottles share, five at most.
+- **Task 19.** There is no separate `BottleRow`: `BottleCard` is a row on phones and a card on wide screens, with a `row` option to stay a row everywhere (used on the gateway).
+- **Task 21, the shelf.** Filters are menus (one per facet) plus search and sort, not chips. The bottle data is written into the page itself, not a separate `reviews.json`. There is no load-more yet; add it when a shelf passes about 60 bottles.
+- **Task 23, hero image.** The owner chose to use the wide photograph already approved, with the two portrait images as the phone crops. Nothing was regenerated.
+- **Task 24.** Wide screens lock the hero to the photograph's shape so the captions stay beside the glass and bottle at any width. Phones show the seal, the tagline and the two portrait images side by side, and never download the wide photograph. Keyboard focus rings the caption.
+- **Task 25.** The email signup only appears once `PUBLIC_BUTTONDOWN_USERNAME` is set. A first version of the scoring page (`/about/scoring/`) was added early because the gateway links to it; its wording still needs the owner's approval in M7.
+
