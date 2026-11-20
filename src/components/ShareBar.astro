@@ -1,0 +1,63 @@
+---
+/** Share and copy-link buttons. Share only appears where the device supports it. */
+interface Props {
+  title: string;
+}
+const { title } = Astro.props;
+---
+
+<div class="share" data-share data-title={title}>
+  <button type="button" data-action="share" hidden>Share</button>
+  <button type="button" data-action="copy">Copy link</button>
+  <span class="status muted" role="status" aria-live="polite"></span>
+</div>
+
+<script>
+  for (const bar of document.querySelectorAll<HTMLElement>('[data-share]')) {
+    const share = bar.querySelector<HTMLButtonElement>('[data-action="share"]');
+    const copy = bar.querySelector<HTMLButtonElement>('[data-action="copy"]');
+    const status = bar.querySelector<HTMLElement>('.status');
+    const url = window.location.href;
+
+    if (share && typeof navigator.share === 'function') {
+      share.hidden = false;
+      share.addEventListener('click', () => {
+        navigator.share({ title: bar.dataset.title, url }).catch(() => {});
+      });
+    }
+
+    copy?.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(url);
+        if (status) status.textContent = 'Link copied.';
+      } catch {
+        if (status) status.textContent = 'Copy the address from your browser bar.';
+      }
+    });
+  }
+</script>
+
+<style>
+  .share {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  button {
+    min-height: 44px;
+    padding: 0 1.25rem;
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 0.9375rem;
+    cursor: pointer;
+    transition: border-color 200ms var(--ease);
+  }
+  button:hover {
+    border-color: var(--accent-text);
+  }
+  .status {
+    font-size: var(--text-xs);
+  }
+</style>

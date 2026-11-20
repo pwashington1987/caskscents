@@ -1,0 +1,26 @@
+---
+/** A wrapped row of small rounded labels, used for fragrance notes. */
+interface Props {
+  items: string[];
+}
+const { items } = Astro.props;
+---
+
+<ul class="pills">
+  {items.map((item) => <li>{item}</li>)}
+</ul>
+
+<style>
+  .pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  li {
+    padding: 0.5rem 0.875rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: var(--text-sm);
+    line-height: 1.2;
+  }
+</style>

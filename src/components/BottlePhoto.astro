@@ -1,0 +1,39 @@
+---
+/** The bottle's photo, or the line drawing for its world when there is no photo yet. */
+import LineArt from './LineArt.astro';
+import { href } from '../lib/href.ts';
+import type { World } from '../lib/validate.ts';
+interface Props {
+  world: World;
+  name: string;
+  image?: string;
+  /** Width in CSS pixels. Height is 1.5 times the width for photos. */
+  width?: number;
+  eager?: boolean;
+}
+const { world, name, image, width = 160, eager = false } = Astro.props;
+---
+
+{
+  image ? (
+    <img
+      class="bottle-photo"
+      src={href(image)}
+      alt={`${name} bottle`}
+      width={width}
+      height={Math.round(width * 1.5)}
+      loading={eager ? 'eager' : 'lazy'}
+      decoding="async"
+    />
+  ) : (
+    <LineArt kind={world === 'whiskey' ? 'glass' : 'bottle'} width={Math.round(width * 0.62)} />
+  )
+}
+
+<style>
+  .bottle-photo {
+    object-fit: cover;
+    mix-blend-mode: lighten;
+    flex: none;
+  }
+</style>

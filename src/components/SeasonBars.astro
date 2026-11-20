@@ -1,0 +1,57 @@
+---
+/** Four labeled bars showing how well a fragrance suits each season. */
+interface Props {
+  seasons: { label: string; percent: number }[];
+}
+const { seasons } = Astro.props;
+---
+
+<div class="seasons">
+  <span class="muted heading">Seasons</span>
+  <ul>
+    {
+      seasons.map((season) => (
+        <li>
+          <span class="name">{season.label}</span>
+          <span class="track" aria-hidden="true">
+            <span class="fill" style={`width:${season.percent}%`} />
+          </span>
+          <span class="visually-hidden">{season.percent} percent</span>
+        </li>
+      ))
+    }
+  </ul>
+</div>
+
+<style>
+  .seasons,
+  ul {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+  }
+  .heading {
+    font-size: var(--text-xs);
+  }
+  li {
+    display: grid;
+    grid-template-columns: 4.25rem 1fr;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .name {
+    font-size: var(--text-sm);
+  }
+  .track {
+    display: block;
+    height: 8px;
+    background: var(--rule);
+    border-radius: 4px;
+  }
+  .fill {
+    display: block;
+    height: 100%;
+    background: var(--accent);
+    border-radius: 4px;
+  }
+</style>

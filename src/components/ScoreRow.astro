@@ -1,0 +1,53 @@
+---
+/** One scored attribute: its name, score, a thin bar, and why it earned that score. */
+import type { ScoreLine } from '../lib/review-view.ts';
+interface Props {
+  line: ScoreLine;
+}
+const { line } = Astro.props;
+---
+
+<div class="score-row">
+  <div class="top">
+    <span class="name">{line.label}</span>
+    <span class="value">{line.score}</span>
+  </div>
+  <div class="track" aria-hidden="true"><div class="fill" style={`width:${line.percent}%`}></div></div>
+  <p class="note">{line.note}</p>
+</div>
+
+<style>
+  .score-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+  .name {
+    font-size: 0.9375rem;
+    font-weight: 600;
+  }
+  .value {
+    font-family: var(--font-mono);
+    font-size: 1.125rem;
+  }
+  .track {
+    height: 3px;
+    background: var(--rule);
+    border-radius: 2px;
+  }
+  .fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+  }
+  .note {
+    font-size: var(--text-sm);
+    line-height: 1.45;
+    color: var(--ash-light);
+  }
+</style>

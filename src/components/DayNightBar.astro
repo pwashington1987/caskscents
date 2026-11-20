@@ -1,0 +1,50 @@
+---
+/** One bar split between day and night. `day` is the daytime share, 0 to 100. */
+interface Props {
+  day: number;
+}
+const { day } = Astro.props;
+const night = 100 - day;
+---
+
+<div class="day-night">
+  <span class="muted heading">Day or night</span>
+  <div class="bar" role="img" aria-label={`${day} percent day, ${night} percent night`}>
+    {day > 0 && <span class="day" style={`flex-grow:${day}`}>Day</span>}
+    {night > 0 && <span class="night" style={`flex-grow:${night}`}>Night</span>}
+  </div>
+</div>
+
+<style>
+  .day-night {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+  }
+  .heading {
+    font-size: var(--text-xs);
+  }
+  .bar {
+    display: flex;
+    height: 2.5rem;
+    border-radius: 6px;
+    overflow: hidden;
+    font-size: var(--text-sm);
+    font-weight: 600;
+  }
+  .bar span {
+    flex-basis: 0;
+    min-width: 4rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .day {
+    background: #d9c6b4;
+    color: #14100d;
+  }
+  .night {
+    background: var(--border);
+    color: var(--bone);
+  }
+</style>

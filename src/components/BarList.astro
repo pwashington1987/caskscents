@@ -1,0 +1,80 @@
+---
+/**
+ * A list of bars, strongest first.
+ * "filled" draws each bar in its own color with the label inside (accords).
+ * "thin" draws a labeled thin bar in the world's accent (whiskey flavors).
+ */
+import type { Bar } from '../lib/review-view.ts';
+interface Props {
+  style: 'filled' | 'thin';
+  items: Bar[];
+}
+const { style, items } = Astro.props;
+---
+
+<ul class={`bars ${style}`}>
+  {
+    items.map((bar) =>
+      style === 'filled' ? (
+        <li
+          class="bar"
+          style={`width:${bar.percent}%;background:${bar.color};color:${bar.textColor}`}
+        >
+          {bar.label}
+          <span class="visually-hidden">, {bar.percent} percent</span>
+        </li>
+      ) : (
+        <li class="row">
+          <span class="name">{bar.label}</span>
+          <span class="track" aria-hidden="true">
+            <span class="fill" style={`width:${bar.percent}%`} />
+          </span>
+          <span class="visually-hidden">{bar.percent} percent</span>
+        </li>
+      ),
+    )
+  }
+</ul>
+
+<style>
+  .bars {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .bar {
+    min-width: max-content;
+    min-height: 2.25rem;
+    display: flex;
+    align-items: center;
+    padding: 0 0.875rem;
+    border-radius: 5px;
+    font-size: var(--text-sm);
+    font-weight: 600;
+  }
+  .thin {
+    gap: 0.875rem;
+  }
+  .row {
+    display: grid;
+    grid-template-columns: minmax(8.5rem, 34%) 1fr;
+    align-items: center;
+    gap: 0.875rem;
+  }
+  .name {
+    font-size: var(--text-sm);
+    color: var(--bone-soft);
+  }
+  .track {
+    display: block;
+    height: 7px;
+    background: var(--rule);
+    border-radius: 4px;
+  }
+  .fill {
+    display: block;
+    height: 100%;
+    background: var(--accent);
+    border-radius: 4px;
+  }
+</style>

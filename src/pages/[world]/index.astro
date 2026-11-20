@@ -7,6 +7,8 @@
 import Base from '../../layouts/Base.astro';
 import { getSite } from '../../lib/site.ts';
 import { formatAbv, formatPrice, formatScore, whiskeyTypeLabel } from '../../lib/labels.ts';
+import { href } from '../../lib/href.ts';
+import { reviewPath, rundownPath } from '../../lib/paths.ts';
 import type { World } from '../../lib/validate.ts';
 
 export function getStaticPaths() {
@@ -52,8 +54,10 @@ const rows = world === 'whiskey'
       {
         rundowns.map((r) => (
           <li>
-            <span class="name display">{r.data.title}</span>
-            <span class="muted count">{r.data.items.length} bottles</span>
+            <a class="row" href={href(rundownPath(world, r.id))}>
+              <span class="name display">{r.data.title}</span>
+              <span class="muted count">{r.data.items.length} bottles</span>
+            </a>
           </li>
         ))
       }
@@ -67,11 +71,13 @@ const rows = world === 'whiskey'
       {
         rows.map((row) => (
           <li>
-            <span class="text">
-              <span class="name display">{row.name}</span>
-              <span class="muted meta">{row.meta}</span>
-            </span>
-            <span class="score">{row.score}</span>
+            <a class="row" href={href(reviewPath(world, row.id))}>
+              <span class="text">
+                <span class="name display">{row.name}</span>
+                <span class="muted meta">{row.meta}</span>
+              </span>
+              <span class="score">{row.score}</span>
+            </a>
           </li>
         ))
       }
@@ -94,12 +100,14 @@ const rows = world === 'whiskey'
     margin-bottom: 1rem;
   }
   .list li {
+    border-top: 1px solid var(--rule);
+  }
+  .row {
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 1rem;
     padding-block: 1rem;
-    border-top: 1px solid var(--rule);
   }
   .text {
     display: flex;

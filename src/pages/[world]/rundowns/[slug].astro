@@ -1,0 +1,131 @@
+---
+/**
+ * A rundown. This is the interim version: the verdict and the bottles as
+ * plain lists. The comparison table and phone layout replace it in
+ * milestone 4.
+ */
+import { render } from 'astro:content';
+import Base from '../../../layouts/Base.astro';
+import { getSite } from '../../../lib/site.ts';
+import { href } from '../../../lib/href.ts';
+import { reviewPath } from '../../../lib/paths.ts';
+import { formatScore } from '../../../lib/labels.ts';
+import type { World } from '../../../lib/validate.ts';
+
+export async function getStaticPaths() {
+  const site = await getSite();
+  return site.rundowns.map((r) => ({
+    params: { world: r.data.category, slug: r.id },
+    props: { id: r.id },
+  }));
+}
+
+interface Props {
+  id: string;
+}
+const { id } = Astro.props;
+const site = await getSite();
+const rundown = site.rundowns.find((r) => r.id === id)!;
+const world: World = rundown.data.category;
+const bottles = rundown.data.items.map((slug) => site.review(world, slug)!);
+const nameOf = (slug: string) => site.review(world, slug)!.data.name;
+const { Content } = await render(rundown);
+---
+
+<Base title={rundown.data.title} description={rundown.data.summary} world={world}>
+  <article>
+    <header class="wrap head">
+      <p class="muted meta">Rundown · {bottles.length} bottles</p>
+      <h1 class="display">{rundown.data.title}</h1>
+      <p class="summary">{rundown.data.summary}</p>
+    </header>
+
+    <section class="section wrap">
+      <h2 class="display">The verdict</h2>
+      <ul class="list">
+        {
+          rundown.data.picks.map((pick) => (
+            <li class="pick">
+              <span class="label">{pick.useCase}</span>
+              <span class="display name">{nameOf(pick.winner)}</span>
+              <span class="why">{pick.why}</span>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+
+    <section class="section wrap">
+      <h2 class="display">The bottles</h2>
+      <ul class="list">
+        {
+          bottles.map((b) => (
+            <li>
+              <a class="bottle" href={href(reviewPath(world, b.id))}>
+                <span class="display name">{b.data.name}</span>
+                <span class="score">{formatScore(b.data.ratings.overall)}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+
+    <section class="section wrap prose">
+      <Content />
+    </section>
+  </article>
+</Base>
+
+<style>
+  .head {
+    padding-block: clamp(1.75rem, 4vw, 3.5rem);
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .meta {
+    font-size: var(--text-xs);
+  }
+  h1 {
+    font-size: var(--text-4xl);
+  }
+  h2 {
+    font-size: var(--text-h2);
+    margin-bottom: 1rem;
+  }
+  .summary {
+    color: var(--bone-soft);
+    max-width: 40rem;
+    font-size: 1.0625rem;
+  }
+  .list li {
+    border-top: 1px solid var(--rule);
+  }
+  .pick {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    padding-block: 1rem;
+  }
+  .name {
+    font-size: var(--text-xl);
+  }
+  .why {
+    color: var(--bone-soft);
+  }
+  .bottle {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    min-height: 3.5rem;
+  }
+  .prose :global(p) {
+    font-size: var(--text-lg);
+    line-height: 1.7;
+    color: var(--bone-soft);
+    margin-bottom: 1rem;
+    max-width: 46rem;
+  }
+</style>
