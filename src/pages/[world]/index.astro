@@ -66,9 +66,7 @@ const tagline = world === 'whiskey' ? 'What is in the glass' : 'What is on the s
           <p class="premise">{feature.view.summary}</p>
           <p class="picks">
             <span class="muted">Names a winner for</span>
-            {feature.view.picks.map((pick) => (
-              <span class="question">{pick.useCase}</span>
-            ))}
+            <span>{feature.view.picks.map((pick) => pick.useCase).join(' · ')}</span>
           </p>
           <a class="read" href={href(rundownPath(world, feature.id))}>
             Read the rundown <span class="rule" aria-hidden="true" />
@@ -189,14 +187,9 @@ const tagline = world === 'whiskey' ? 'What is in the glass' : 'What is on the s
   .picks {
     display: flex;
     flex-wrap: wrap;
-    align-items: center;
-    gap: 0.5rem 0.625rem;
+    gap: 0.125rem 0.625rem;
     font-size: var(--text-sm);
-  }
-  .question {
-    padding: 0.3125rem 0.75rem;
-    border: 1px solid var(--border);
-    border-radius: 999px;
+    line-height: 1.5;
   }
   .read {
     display: inline-flex;
