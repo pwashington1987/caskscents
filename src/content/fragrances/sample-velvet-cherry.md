@@ -37,6 +37,7 @@ bestFor: "A dinner in November where you want to be remembered and not noticed."
 tags: [niche, date-night, cold-weather, sample-first]
 featured: true
 reviewedDate: 2026-11-17
+image: /bottles/fragrance/sample-velvet-cherry.webp
 ---
 
 This is a sample review. It exists so every part of the review page can be seen and tested, and it is never published.

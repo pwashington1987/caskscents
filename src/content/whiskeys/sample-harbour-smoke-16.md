@@ -29,6 +29,7 @@ profile: { peat: 5, sweetness: 3 }
 tags: [peated, sherried, special-occasion]
 featured: true
 reviewedDate: 2026-11-18
+image: /bottles/whiskey/sample-harbour-smoke-16.webp
 ---
 
 This is a sample review. It exists so every part of the review page can be seen and tested, and it is never published.
