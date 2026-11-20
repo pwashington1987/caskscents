@@ -1,5 +1,8 @@
 ---
-/** One world's half of "The latest from both worlds" on the gateway. */
+/**
+ * One world's half of "The latest from both worlds" on the gateway.
+ * No scores and no winners here: readers open the page to see them.
+ */
 import BottleCard from './BottleCard.astro';
 import { href } from '../lib/href.ts';
 import { plural } from '../lib/labels.ts';
@@ -31,9 +34,7 @@ const empty = !rundown && reviews.length === 0;
         <span class="muted kicker">New rundown · {plural(rundown.view.bottles.length, 'bottle')}</span>
         <span class="display title">{rundown.view.title}</span>
         <span class="premise">{rundown.view.summary}</span>
-        <span class="pick">
-          {rundown.view.picks[0].useCase}: {rundown.view.picks[0].winner}
-        </span>
+        <span class="pick">See which bottle wins</span>
       </a>
     )
   }
@@ -43,7 +44,7 @@ const empty = !rundown && reviews.length === 0;
       <ul class="rows">
         {reviews.map((item) => (
           <li>
-            <BottleCard id={item.id} view={item.view} summary={false} row />
+            <BottleCard id={item.id} view={item.view} summary={false} row score={false} />
           </li>
         ))}
       </ul>

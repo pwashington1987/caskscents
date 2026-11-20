@@ -14,8 +14,10 @@ interface Props {
   summary?: boolean;
   /** Stay a compact row at every width. */
   row?: boolean;
+  /** Show the overall score. The gateway leaves it out, so readers open the review to see it. */
+  score?: boolean;
 }
-const { id, view, summary = true, row = false } = Astro.props;
+const { id, view, summary = true, row = false, score = true } = Astro.props;
 ---
 
 <a class={`card ${row ? 'row-only' : ''}`} href={href(reviewPath(view.world, id))}>
@@ -25,7 +27,7 @@ const { id, view, summary = true, row = false } = Astro.props;
   <span class="text">
     <span class="top">
       <span class="display name">{view.name}</span>
-      <span class="score">{view.overall}</span>
+      {score ? <span class="score">{view.overall}</span> : <span class="go" aria-hidden="true">→</span>}
     </span>
     <span class="muted meta">{view.cardMeta}</span>
     {summary && <span class="summary">{view.summary}</span>}
@@ -76,6 +78,13 @@ const { id, view, summary = true, row = false } = Astro.props;
   }
   .score {
     font-size: 1.1875rem;
+  }
+  .go {
+    color: var(--accent-text);
+    transition: transform 200ms var(--ease);
+  }
+  .card:hover .go {
+    transform: translateX(3px);
   }
   .meta {
     font-size: var(--text-xs);
