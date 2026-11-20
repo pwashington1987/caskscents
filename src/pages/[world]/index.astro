@@ -1,0 +1,123 @@
+---
+/**
+ * World home. This is the interim version: plain lists that prove the
+ * content loads and validates. The Front Page layout replaces it in
+ * milestone 5.
+ */
+import Base from '../../layouts/Base.astro';
+import { getSite } from '../../lib/site.ts';
+import { formatAbv, formatPrice, formatScore, whiskeyTypeLabel } from '../../lib/labels.ts';
+import type { World } from '../../lib/validate.ts';
+
+export function getStaticPaths() {
+  return [{ params: { world: 'whiskey' } }, { params: { world: 'fragrance' } }];
+}
+
+const world = Astro.params.world as World;
+const site = await getSite();
+const title = world === 'whiskey' ? 'Whiskey' : 'Fragrance';
+const rundowns = site.rundownsFor(world);
+
+const rows = world === 'whiskey'
+  ? site.whiskeys.map((w) => ({
+      id: w.id,
+      name: w.data.name,
+      meta: [whiskeyTypeLabel(w.data.type, w.data.country), w.data.region, formatAbv(w.data.abv), formatPrice(w.data.price, w.data.currency)].join(' · '),
+      score: formatScore(w.data.ratings.overall),
+    }))
+  : site.fragrances.map((f) => ({
+      id: f.id,
+      name: f.data.name,
+      meta: [f.data.house, f.data.concentration, formatPrice(f.data.price, f.data.currency)].join(' · '),
+      score: formatScore(f.data.ratings.overall),
+    }));
+---
+
+<Base
+  title={title}
+  description={world === 'whiskey'
+    ? 'Whiskey reviews and side-by-side rundowns, scored honestly.'
+    : 'Fragrance reviews and side-by-side rundowns, scored honestly.'}
+  world={world}
+>
+  <div class="wrap head">
+    <p class="label">{title}</p>
+    <h1 class="display">{world === 'whiskey' ? 'What is in the glass' : 'What is on the skin'}</h1>
+  </div>
+
+  <section class="section wrap">
+    <h2 class="display">Rundowns</h2>
+    {rundowns.length === 0 && <p class="muted empty">The first rundown is on its way.</p>}
+    <ul class="list">
+      {
+        rundowns.map((r) => (
+          <li>
+            <span class="name display">{r.data.title}</span>
+            <span class="muted">{r.data.items.length} bottles</span>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <section class="section wrap">
+    <h2 class="display">Reviews</h2>
+    {rows.length === 0 && <p class="muted empty">The first reviews are on their way.</p>}
+    <ul class="list">
+      {
+        rows.map((row) => (
+          <li>
+            <span class="text">
+              <span class="name display">{row.name}</span>
+              <span class="muted meta">{row.meta}</span>
+            </span>
+            <span class="score">{row.score}</span>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</Base>
+
+<style>
+  .head {
+    padding-block: clamp(2rem, 5vw, 4rem);
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  h1 {
+    font-size: var(--text-4xl);
+  }
+  h2 {
+    font-size: var(--text-2xl);
+    margin-bottom: 1rem;
+  }
+  .list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding-block: 1rem;
+    border-top: 1px solid var(--rule);
+  }
+  .text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    min-width: 0;
+  }
+  .name {
+    font-size: var(--text-xl);
+    line-height: 1.2;
+  }
+  .meta {
+    font-size: var(--text-xs);
+  }
+  .score {
+    font-size: 1.25rem;
+  }
+  .empty {
+    padding-block: 1rem;
+  }
+</style>

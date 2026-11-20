@@ -1,0 +1,49 @@
+---
+/**
+ * The CS seal. `open` draws the two halves eased apart, as on the gateway.
+ * `label` gives it a name for screen readers; leave it out when the seal is
+ * decoration beside the wordmark.
+ */
+interface Props {
+  size?: number;
+  open?: boolean;
+  label?: string;
+}
+const { size = 28, open = false, label } = Astro.props;
+const shift = open ? 3 : 0;
+const hairline = size < 60 ? 3.2 : 0.8;
+---
+
+<svg
+  class="seal"
+  width={size}
+  height={size}
+  viewBox="0 0 100 100"
+  role={label ? 'img' : undefined}
+  aria-label={label}
+  aria-hidden={label ? undefined : 'true'}
+>
+  <g class="half half-c" transform={`translate(${-shift} 0)`}>
+    <path d="M50 4 A46 46 0 0 0 50 96" fill="none" stroke="currentColor" stroke-width={hairline}></path>
+    {size >= 60 && <path d="M50 9 A41 41 0 0 0 50 91" fill="none" stroke="currentColor" stroke-width="0.4" opacity="0.6" />}
+    <text x={36 - (open ? 1 : 0)} y="64" text-anchor="middle">C</text>
+  </g>
+  <g class="half half-s" transform={`translate(${shift} 0)`}>
+    <path d="M50 4 A46 46 0 0 1 50 96" fill="none" stroke="currentColor" stroke-width={hairline}></path>
+    {size >= 60 && <path d="M50 9 A41 41 0 0 1 50 91" fill="none" stroke="currentColor" stroke-width="0.4" opacity="0.6" />}
+    <text x={63 + (open ? 1 : 0)} y="64" text-anchor="middle">S</text>
+  </g>
+</svg>
+
+<style>
+  .seal {
+    color: var(--gold);
+    flex: none;
+  }
+  text {
+    font-family: var(--font-logo);
+    font-size: 46px;
+    font-weight: 300;
+    fill: currentColor;
+  }
+</style>

@@ -1,0 +1,55 @@
+---
+/**
+ * The frame around every page: fonts, colors, the top bar and the footer.
+ * `world` switches the accent colors and the navigation.
+ */
+import '@fontsource-variable/fraunces/opsz.css';
+import '@fontsource-variable/manrope/index.css';
+import '@fontsource/dm-mono/400.css';
+import '@fontsource/cormorant-garamond/300.css';
+import '@fontsource/cormorant-garamond/500.css';
+import '@fontsource/cormorant-garamond/500-italic.css';
+import '../styles/tokens.css';
+import '../styles/base.css';
+import SiteNav from '../components/SiteNav.astro';
+import Footer from '../components/Footer.astro';
+import { showDrafts } from '../lib/site.ts';
+import type { World } from '../lib/validate.ts';
+
+interface Props {
+  title: string;
+  description: string;
+  world?: World | null;
+  /** Set false on pages that draw their own top bar, such as the gateway. */
+  nav?: boolean;
+}
+const { title, description, world = null, nav = true } = Astro.props;
+const fullTitle = title === 'CaskScents' ? title : `${title} · CaskScents`;
+const previewing = showDrafts && import.meta.env.PROD;
+---
+
+<!doctype html>
+<html lang="en" data-world={world ?? undefined}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#14100d" />
+    {previewing && <meta name="robots" content="noindex, nofollow" />}
+  </head>
+  <body>
+    {
+      previewing && (
+        <p class="sample-banner">
+          Preview build. Entries marked "Sample" are placeholders and will not be published.
+        </p>
+      )
+    }
+    {nav && <SiteNav world={world} />}
+    <main>
+      <slot />
+    </main>
+    <Footer world={world} />
+  </body>
+</html>

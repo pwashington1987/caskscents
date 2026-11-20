@@ -1,0 +1,81 @@
+---
+/**
+ * Thin gold line drawings of a Glencairn glass and a perfume bottle. Used
+ * when a bottle has no photo yet, and as the gateway's fallback artwork.
+ */
+interface Props {
+  kind: 'glass' | 'bottle';
+  width?: number;
+  label?: string;
+}
+const { kind, width = 80, label } = Astro.props;
+const height = width * 2;
+---
+
+<svg
+  class={`line-art ${kind}`}
+  width={width}
+  height={height}
+  viewBox="0 0 160 320"
+  role={label ? 'img' : undefined}
+  aria-label={label}
+  aria-hidden={label ? undefined : 'true'}
+>
+  {
+    kind === 'glass' ? (
+      <>
+        <path class="liquid" d="M29 150 C28 156 28 162 28 168 C30 200 56 214 66 224 L94 224 C104 214 130 200 132 168 C132 162 132 156 131 150 Z" />
+        <ellipse class="thin" cx="80" cy="150" rx="51" ry="7" />
+        <path d="M46 40 C45 92 27 122 28 168 C30 200 56 214 66 224 C68 234 66 244 56 252" />
+        <path d="M114 40 C115 92 133 122 132 168 C130 200 104 214 94 224 C92 234 94 244 104 252" />
+        <ellipse cx="80" cy="40" rx="34" ry="5" />
+        <ellipse cx="80" cy="256" rx="42" ry="8" />
+        <path d="M38 256 L38 264 Q38 274 80 274 Q122 274 122 264 L122 256" />
+        <path class="thin faint" d="M41 74 C40 102 35 126 36 146" />
+      </>
+    ) : (
+      <>
+        <rect class="liquid" x="49" y="132" width="62" height="140" rx="2" />
+        <path class="thin" d="M49 132 L111 132" />
+        <path d="M58 20 L102 20 L107 29 L107 66 L53 66 L53 29 Z" />
+        <path class="thin faint" d="M53 29 L107 29 M66 29 L66 66 M94 29 L94 66" />
+        <rect x="66" y="66" width="28" height="10" />
+        <path d="M40 94 Q40 76 58 76 L102 76 Q120 76 120 94 L120 284 Q120 292 112 292 L48 292 Q40 292 40 284 Z" />
+        <path class="thin faint" d="M49 96 Q49 86 59 86 L101 86 Q111 86 111 96 L111 272 L49 272 Z" />
+        <rect class="thin" x="62" y="172" width="36" height="46" />
+      </>
+    )
+  }
+</svg>
+
+<style>
+  .line-art {
+    flex: none;
+    color: var(--gold);
+  }
+  .line-art :global(path),
+  .line-art :global(ellipse),
+  .line-art :global(rect) {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .line-art :global(.thin) {
+    stroke-width: 1;
+  }
+  .line-art :global(.faint) {
+    opacity: 0.5;
+  }
+  .line-art :global(.liquid) {
+    stroke: none;
+    opacity: 0.36;
+  }
+  .glass :global(.liquid) {
+    fill: #b8702e;
+  }
+  .bottle :global(.liquid) {
+    fill: #c98a7e;
+  }
+</style>

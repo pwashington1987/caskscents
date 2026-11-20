@@ -1,0 +1,34 @@
+---
+/** The name, with the small seal beside it. Links home. */
+import Seal from './Seal.astro';
+import { href } from '../lib/href.ts';
+interface Props {
+  seal?: boolean;
+}
+const { seal = true } = Astro.props;
+---
+
+<a class="wordmark" href={href('/')} aria-label="CaskScents home">
+  {seal && <Seal size={28} />}
+  <span>CaskScents</span>
+</a>
+
+<style>
+  .wordmark {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+    min-height: 44px;
+    color: var(--bone);
+  }
+  .wordmark:hover {
+    color: var(--bone);
+  }
+  span {
+    font-family: var(--font-logo);
+    font-style: italic;
+    font-weight: 500;
+    font-size: 1.5625rem;
+    line-height: 1;
+  }
+</style>

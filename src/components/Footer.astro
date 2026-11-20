@@ -1,0 +1,38 @@
+---
+/** The closing line on every page. The whiskey world adds a drinking note. */
+import type { World } from '../lib/validate.ts';
+interface Props {
+  world: World | null;
+}
+const { world } = Astro.props;
+const sense = world === 'fragrance' ? 'nose' : world === 'whiskey' ? 'palate' : 'palate and nose';
+---
+
+<footer class="footer wrap">
+  <span class="name">CaskScents</span>
+  <p>
+    Scores are one person's {sense}. Prices are what I paid.
+    {world !== 'fragrance' && ' Please drink responsibly.'}
+  </p>
+</footer>
+
+<style>
+  .footer {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem 2rem;
+    padding-block: 2rem;
+    border-top: 1px solid var(--rule);
+    color: var(--ash);
+    font-size: var(--text-xs);
+  }
+  .name {
+    font-family: var(--font-logo);
+    font-style: italic;
+    font-weight: 500;
+    font-size: 1.1875rem;
+    color: var(--ash-light);
+  }
+</style>

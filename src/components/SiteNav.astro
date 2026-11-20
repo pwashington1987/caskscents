@@ -1,0 +1,155 @@
+---
+/**
+ * The top bar. Inside a world it shows that world's name and its links;
+ * outside (gateway, about) it links to both worlds.
+ */
+import Wordmark from './Wordmark.astro';
+import { href } from '../lib/href.ts';
+import type { World } from '../lib/validate.ts';
+
+interface Props {
+  world: World | null;
+}
+const { world } = Astro.props;
+const other: World | null = world === 'whiskey' ? 'fragrance' : world === 'fragrance' ? 'whiskey' : null;
+const title = (w: World) => (w === 'whiskey' ? 'Whiskey' : 'Fragrance');
+
+// Links are added here as their pages are built.
+const links: { label: string; path: string }[] = world
+  ? [{ label: `${title(world)} home`, path: `/${world}/` }]
+  : [
+      { label: 'Whiskey', path: '/whiskey/' },
+      { label: 'Fragrance', path: '/fragrance/' },
+    ];
+---
+
+<header class="nav wrap">
+  <div class="brand">
+    <Wordmark />
+    {
+      world && (
+        <a class="world label" href={href(`/${world}/`)}>
+          {title(world)}
+        </a>
+      )
+    }
+  </div>
+
+  <nav class="links desktop" aria-label="Main">
+    {links.map((link) => <a href={href(link.path)}>{link.label}</a>)}
+    {
+      other && (
+        <a class="switch" href={href(`/${other}/`)} data-other={other}>
+          Switch to {title(other)}
+        </a>
+      )
+    }
+  </nav>
+
+  <details class="menu">
+    <summary aria-label="Menu">
+      <span></span>
+      <span></span>
+    </summary>
+    <nav class="links" aria-label="Main">
+      {links.map((link) => <a href={href(link.path)}>{link.label}</a>)}
+      {other && <a href={href(`/${other}/`)}>Switch to {title(other)}</a>}
+    </nav>
+  </details>
+</header>
+
+<style>
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding-block: 1rem;
+    position: relative;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    min-width: 0;
+  }
+  .world {
+    padding-left: 1.25rem;
+    border-left: 1px solid var(--border);
+    line-height: 1.6;
+  }
+  .links {
+    display: flex;
+    align-items: center;
+    gap: 2.25rem;
+    font-size: var(--text-sm);
+    color: var(--ash-light);
+  }
+  .links a {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+  .switch[data-other='fragrance'] {
+    color: #c98a7e;
+  }
+  .switch[data-other='whiskey'] {
+    color: #e09a3a;
+  }
+  .menu {
+    display: none;
+  }
+  .menu summary {
+    list-style: none;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 6px;
+    cursor: pointer;
+  }
+  .menu summary::-webkit-details-marker {
+    display: none;
+  }
+  .menu summary span {
+    display: block;
+    height: 1px;
+    background: var(--bone);
+    width: 22px;
+  }
+  .menu summary span + span {
+    width: 14px;
+  }
+  .menu .links {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    z-index: 10;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    padding: 0.5rem var(--page-pad) 1rem;
+    background: var(--ink);
+    border-bottom: 1px solid var(--rule);
+    font-size: var(--text-base);
+  }
+  .menu .links a {
+    min-height: 48px;
+    border-top: 1px solid var(--rule);
+  }
+
+  @media (max-width: 720px) {
+    .desktop {
+      display: none;
+    }
+    .menu {
+      display: block;
+    }
+    .world {
+      display: none;
+    }
+  }
+</style>

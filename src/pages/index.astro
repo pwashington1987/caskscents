@@ -1,0 +1,76 @@
+---
+/**
+ * The gateway. This is the interim version: the seal and the two worlds,
+ * with the line drawings. The photographic hero and the "latest from both
+ * worlds" section replace it in milestone 6.
+ */
+import Base from '../layouts/Base.astro';
+import Seal from '../components/Seal.astro';
+import LineArt from '../components/LineArt.astro';
+import { href } from '../lib/href.ts';
+---
+
+<Base title="CaskScents" description="Honest reviews of what you pour and what you wear.">
+  <section class="hero wrap">
+    <a class="side" href={href('/whiskey/')}>
+      <span class="word display">Whiskey</span>
+      <LineArt kind="glass" width={110} />
+      <span class="label enter" style="color:#e09a3a">Enter</span>
+    </a>
+    <div class="middle">
+      <Seal size={260} open label="The CaskScents seal" />
+      <h1 class="display">Honest reviews of what you pour and what you wear.</h1>
+    </div>
+    <a class="side" href={href('/fragrance/')}>
+      <span class="word display">Fragrance</span>
+      <LineArt kind="bottle" width={110} />
+      <span class="label enter" style="color:#c98a7e">Enter</span>
+    </a>
+  </section>
+</Base>
+
+<style>
+  .hero {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: clamp(1.5rem, 4vw, 4.5rem);
+    padding-block: clamp(2rem, 6vw, 5rem);
+  }
+  .side {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    text-align: center;
+    color: var(--bone);
+  }
+  .word {
+    font-size: var(--text-4xl);
+  }
+  .middle {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.75rem;
+    text-align: center;
+    max-width: 26rem;
+  }
+  h1 {
+    font-size: var(--text-2xl);
+    line-height: 1.2;
+  }
+  @media (max-width: 860px) {
+    .hero {
+      grid-template-columns: 1fr 1fr;
+    }
+    .middle {
+      grid-column: 1 / -1;
+      grid-row: 1;
+      justify-self: center;
+    }
+    .word {
+      font-size: 2.125rem;
+    }
+  }
+</style>

@@ -1,0 +1,39 @@
+---
+import Base from '../layouts/Base.astro';
+import { href } from '../lib/href.ts';
+---
+
+<Base title="Page not found" description="That page is not here.">
+  <section class="wrap lost">
+    <p class="label">404</p>
+    <h1 class="display">Nothing poured here.</h1>
+    <p class="muted">The page you were after has moved or never existed.</p>
+    <p class="ways">
+      <a href={href('/whiskey/')}>Go to Whiskey</a>
+      <a href={href('/fragrance/')}>Go to Fragrance</a>
+    </p>
+  </section>
+</Base>
+
+<style>
+  .lost {
+    padding-block: clamp(3rem, 10vw, 8rem);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  h1 {
+    font-size: var(--text-4xl);
+  }
+  .ways {
+    display: flex;
+    gap: 2rem;
+    margin-top: 1rem;
+    color: var(--accent-text);
+  }
+  .ways a {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+</style>
