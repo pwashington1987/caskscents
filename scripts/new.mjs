@@ -29,6 +29,7 @@ export const templates = {
   whiskey: (name, today) => `---
 draft: true
 name: ${quote(name)}
+# shortName: ""          # optional, 16 characters at most, used in rundown tables
 distillery: "Distillery name"
 region: Islay            # one of the regions in src/data/whiskey.ts
 country: Scotland
@@ -66,6 +67,7 @@ Write the review here.
   fragrance: (name, today) => `---
 draft: true
 name: ${quote(name)}
+# shortName: ""                # optional, 16 characters at most, used in rundown tables
 house: "House name"
 year: ${today.slice(0, 4)}
 concentration: Eau de Parfum   # one of the concentrations in src/data/fragrance.ts

@@ -1,6 +1,7 @@
 ---
 draft: true
 name: "Sample: Citrus Club"
+shortName: "Citrus Club"
 house: "Example Maison"
 year: 2021
 concentration: Eau de Toilette

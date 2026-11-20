@@ -1,6 +1,7 @@
 ---
 draft: true
 name: "Sample: Shoreline 10"
+shortName: "Shoreline 10"
 distillery: "Example Distillery"
 region: Islay
 country: Scotland

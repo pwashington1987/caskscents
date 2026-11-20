@@ -1,0 +1,58 @@
+---
+/** The winner for each use case. The first pick carries the gold rule. */
+import { href } from '../lib/href.ts';
+import { reviewPath } from '../lib/paths.ts';
+import type { RundownView } from '../lib/rundown-view.ts';
+interface Props {
+  view: RundownView;
+}
+const { view } = Astro.props;
+---
+
+<ul class="verdict" style={`--picks:${view.picks.length}`}>
+  {
+    view.picks.map((pick) => (
+      <li class={pick.lead ? 'lead' : ''}>
+        <span class="label use">{pick.useCase}</span>
+        <a class="display winner" href={href(reviewPath(view.world, pick.winnerId))}>
+          {pick.winner}
+        </a>
+        <span class="why">{pick.why}</span>
+      </li>
+    ))
+  }
+</ul>
+
+<style>
+  .verdict {
+    display: grid;
+    gap: 0 2.5rem;
+  }
+  li {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding-block: 1.125rem;
+    border-top: 1px solid var(--rule);
+  }
+  .lead {
+    border-top-color: var(--gold);
+  }
+  .lead .use {
+    color: var(--gold);
+  }
+  .winner {
+    font-size: clamp(1.625rem, 1.4rem + 0.8vw, 1.9375rem);
+    line-height: 1.1;
+  }
+  .why {
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    color: var(--bone-soft);
+  }
+  @media (min-width: 860px) {
+    .verdict {
+      grid-template-columns: repeat(var(--picks), minmax(0, 1fr));
+    }
+  }
+</style>

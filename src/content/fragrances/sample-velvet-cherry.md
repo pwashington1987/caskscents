@@ -1,6 +1,7 @@
 ---
 draft: true
 name: "Sample: Velvet Cherry"
+shortName: "Velvet Cherry"
 house: "Example Parfums"
 year: 2018
 concentration: Eau de Parfum

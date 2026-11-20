@@ -1,15 +1,19 @@
 ---
-/**
- * A rundown. This is the interim version: the verdict and the bottles as
- * plain lists. The comparison table and phone layout replace it in
- * milestone 4.
- */
+/** A rundown: two to four bottles compared, with a winner for each use case. */
 import { render } from 'astro:content';
 import Base from '../../../layouts/Base.astro';
+import BottlePhoto from '../../../components/BottlePhoto.astro';
+import VerdictList from '../../../components/VerdictList.astro';
+import CompareTable from '../../../components/CompareTable.astro';
+import CompareGrid from '../../../components/CompareGrid.astro';
+import CompareAccordion from '../../../components/CompareAccordion.astro';
+import ProfileCompare from '../../../components/ProfileCompare.astro';
+import ShareBar from '../../../components/ShareBar.astro';
 import { getSite } from '../../../lib/site.ts';
+import { viewOf } from '../../../lib/views.ts';
+import { rundownView } from '../../../lib/rundown-view.ts';
 import { href } from '../../../lib/href.ts';
 import { reviewPath } from '../../../lib/paths.ts';
-import { formatScore } from '../../../lib/labels.ts';
 import type { World } from '../../../lib/validate.ts';
 
 export async function getStaticPaths() {
@@ -27,59 +31,98 @@ const { id } = Astro.props;
 const site = await getSite();
 const rundown = site.rundowns.find((r) => r.id === id)!;
 const world: World = rundown.data.category;
-const bottles = rundown.data.items.map((slug) => site.review(world, slug)!);
-const nameOf = (slug: string) => site.review(world, slug)!.data.name;
+const items = rundown.data.items.map((slug) => ({ id: slug, view: viewOf(site.review(world, slug)!) }));
+const view = rundownView(rundown.data, items);
 const { Content } = await render(rundown);
 ---
 
-<Base title={rundown.data.title} description={rundown.data.summary} world={world}>
+<Base title={view.title} description={view.summary} world={world}>
   <article>
     <header class="wrap head">
-      <p class="muted meta">Rundown · {bottles.length} bottles</p>
-      <h1 class="display">{rundown.data.title}</h1>
-      <p class="summary">{rundown.data.summary}</p>
-    </header>
-
-    <section class="section wrap">
-      <h2 class="display">The verdict</h2>
-      <ul class="list">
+      <p class="muted meta">
+        {rundown.data.draft && <span class="draft-tag">Draft</span>}
+        {view.meta.join(' · ')}
+      </p>
+      <h1 class="display">{view.title}</h1>
+      <p class="summary">{view.summary}</p>
+      <ul class="lineup" style={`--count:${view.bottles.length}`}>
         {
-          rundown.data.picks.map((pick) => (
-            <li class="pick">
-              <span class="label">{pick.useCase}</span>
-              <span class="display name">{nameOf(pick.winner)}</span>
-              <span class="why">{pick.why}</span>
-            </li>
-          ))
-        }
-      </ul>
-    </section>
-
-    <section class="section wrap">
-      <h2 class="display">The bottles</h2>
-      <ul class="list">
-        {
-          bottles.map((b) => (
+          view.bottles.map((b) => (
             <li>
-              <a class="bottle" href={href(reviewPath(world, b.id))}>
-                <span class="display name">{b.data.name}</span>
-                <span class="score">{formatScore(b.data.ratings.overall)}</span>
+              <a href={href(reviewPath(world, b.id))}>
+                <BottlePhoto world={world} name={b.name} image={b.image} width={120} eager />
+                <span class="bottle-name">{b.name}</span>
               </a>
             </li>
           ))
         }
       </ul>
+    </header>
+
+    <section class="section wrap">
+      <h2 class="display">The verdict</h2>
+      <VerdictList view={view} />
     </section>
 
-    <section class="section wrap prose">
-      <Content />
+    <section class="section wrap wide-only">
+      <div class="heading-row">
+        <h2 class="display">Side by side</h2>
+        <p class="muted caption">Scores out of 10. The highest in each row is gold.</p>
+      </div>
+      <CompareTable view={view} />
+    </section>
+
+    <section class="section wrap narrow-only">
+      <h2 class="display">Scores at a glance</h2>
+      <p class="muted caption below">Out of 10. The highest in each row is gold.</p>
+      <CompareGrid view={view} />
+    </section>
+
+    <section class="section wrap narrow-only">
+      <h2 class="display">Why, score by score</h2>
+      <p class="muted caption below">Tap a row to open it.</p>
+      <CompareAccordion view={view} />
+    </section>
+
+    <section class="section wrap story">
+      <div>
+        <h2 class="display">{view.profile.title}</h2>
+        <ProfileCompare groups={view.profile.groups} />
+      </div>
+      <div class="prose">
+        <h2 class="display">How it went</h2>
+        <Content />
+      </div>
+    </section>
+
+    <section class="section wrap">
+      <h2 class="muted small-heading">The full reviews</h2>
+      <ul class="reviews">
+        {
+          view.bottles.map((b) => (
+            <li>
+              <a href={href(reviewPath(world, b.id))}>
+                <span class="display">{b.name}</span>
+                <span class="score">{b.overall}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+      <div class="share">
+        <ShareBar title={`${view.title} · CaskScents`} />
+      </div>
     </section>
   </article>
 </Base>
 
 <style>
+  h2.display {
+    font-size: var(--text-h2);
+    margin-bottom: 1.25rem;
+  }
   .head {
-    padding-block: clamp(1.75rem, 4vw, 3.5rem);
+    padding-block: clamp(1.75rem, 4vw, 3.5rem) clamp(1.5rem, 3vw, 2.5rem);
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
@@ -87,45 +130,126 @@ const { Content } = await render(rundown);
   .meta {
     font-size: var(--text-xs);
   }
+  .draft-tag {
+    margin-right: 0.625rem;
+    padding: 0.125rem 0.5rem;
+    border: 1px solid var(--gold);
+    border-radius: 999px;
+    color: var(--gold);
+  }
   h1 {
     font-size: var(--text-4xl);
-  }
-  h2 {
-    font-size: var(--text-h2);
-    margin-bottom: 1rem;
+    line-height: 1.02;
+    max-width: 18ch;
   }
   .summary {
+    font-size: clamp(1rem, 0.95rem + 0.3vw, 1.125rem);
+    line-height: 1.55;
     color: var(--bone-soft);
     max-width: 40rem;
-    font-size: 1.0625rem;
   }
-  .list li {
-    border-top: 1px solid var(--rule);
+  .lineup {
+    display: grid;
+    grid-template-columns: repeat(var(--count), minmax(0, 1fr));
+    gap: 0.5rem;
+    align-items: end;
+    margin-top: 1.5rem;
+    max-width: 52rem;
   }
-  .pick {
+  .lineup a {
     display: flex;
     flex-direction: column;
-    gap: 0.375rem;
-    padding-block: 1rem;
+    align-items: center;
+    gap: 0.75rem;
+    text-align: center;
   }
-  .name {
-    font-size: var(--text-xl);
+  .lineup :global(svg),
+  .lineup :global(img) {
+    width: min(100%, 4.75rem);
+    height: auto;
   }
-  .why {
-    color: var(--bone-soft);
+  .bottle-name {
+    font-size: var(--text-xs);
+    line-height: 1.25;
   }
-  .bottle {
+
+  .heading-row {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: baseline;
     gap: 1rem;
-    min-height: 3.5rem;
+  }
+  .caption {
+    font-size: var(--text-xs);
+  }
+  .caption.below {
+    margin: -0.75rem 0 1rem;
+  }
+  .wide-only {
+    display: none;
+  }
+
+  .story {
+    display: grid;
+    gap: var(--section-pad) 4rem;
   }
   .prose :global(p) {
     font-size: var(--text-lg);
     line-height: 1.7;
     color: var(--bone-soft);
     margin-bottom: 1rem;
-    max-width: 46rem;
+    max-width: 44rem;
+  }
+  .prose :global(a) {
+    color: var(--accent-text);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .small-heading {
+    font-size: var(--text-xs);
+    font-weight: 400;
+    margin-bottom: 0.5rem;
+  }
+  .reviews {
+    display: grid;
+    gap: 0 2.5rem;
+  }
+  .reviews a {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    min-height: 3.25rem;
+    border-top: 1px solid var(--rule);
+    font-size: 1.1875rem;
+  }
+  .reviews .score {
+    font-size: 1rem;
+  }
+  .share {
+    margin-top: 1.5rem;
+  }
+
+  @media (min-width: 860px) {
+    .wide-only {
+      display: block;
+    }
+    .narrow-only {
+      display: none;
+    }
+    .story {
+      grid-template-columns: 5fr 7fr;
+    }
+    .reviews {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .lineup :global(svg),
+    .lineup :global(img) {
+      width: 5.5rem;
+    }
+    .bottle-name {
+      font-size: var(--text-sm);
+    }
   }
 </style>

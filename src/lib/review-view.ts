@@ -9,6 +9,7 @@ import type { World } from './validate.ts';
 
 type Shared = {
   name: string;
+  shortName?: string;
   price: number;
   currency: string;
   batch?: string;
@@ -80,6 +81,11 @@ export type ReviewView = {
   };
   bestFor?: string;
   features: string[];
+  /** Used when bottles are compared side by side in a rundown. */
+  shortName?: string;
+  brand: string;
+  group: string;
+  compareFacts: { label: string; value: string }[];
 };
 
 const capital = (word: string) => word[0].toUpperCase() + word.slice(1);
@@ -146,6 +152,13 @@ export function whiskeyView(d: WhiskeyData): ReviewView {
       ],
     },
     features: [...flavors.map((f) => f.label), ...d.tags, `region:${d.region}`, `type:${d.type}`],
+    shortName: d.shortName,
+    brand: d.distillery,
+    group: d.region,
+    compareFacts: [
+      { label: 'ABV', value: formatAbv(d.abv) },
+      { label: 'Paid', value: formatPrice(d.price, d.currency) },
+    ],
   };
 }
 
@@ -200,5 +213,12 @@ export function fragranceView(d: FragranceData): ReviewView {
     },
     bestFor: d.bestFor,
     features: [...accords.map((a) => a.label), ...d.tags, `house:${d.house}`],
+    shortName: d.shortName,
+    brand: d.house,
+    group: accord(accords[0].label)?.family ?? '',
+    compareFacts: [
+      { label: 'Size', value: `${d.volumeMl} ml` },
+      { label: 'Paid', value: formatPrice(d.price, d.currency) },
+    ],
   };
 }

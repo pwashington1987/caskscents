@@ -151,3 +151,23 @@ test('features for finding similar bottles', () => {
     'Vanilla', 'Sweet', 'Cherry', 'niche', 'house:Example Parfums',
   ]);
 });
+
+test('details used when bottles are compared in a rundown', () => {
+  const w = whiskeyView({ ...whiskey, shortName: 'Harbour 16' });
+  assert.equal(w.shortName, 'Harbour 16');
+  assert.equal(w.brand, 'Example Distillery');
+  assert.equal(w.group, 'Islay');
+  assert.deepEqual(w.compareFacts, [
+    { label: 'ABV', value: '43%' },
+    { label: 'Paid', value: '$110' },
+  ]);
+
+  const f = fragranceView(fragrance);
+  assert.equal(f.shortName, undefined);
+  assert.equal(f.brand, 'Example Parfums');
+  assert.equal(f.group, 'Gourmand');
+  assert.deepEqual(f.compareFacts, [
+    { label: 'Size', value: '100 ml' },
+    { label: 'Paid', value: '$195' },
+  ]);
+});

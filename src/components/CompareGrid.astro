@@ -1,0 +1,115 @@
+---
+/** Scores at a glance for phones: numbers only, sized to fit without sideways scrolling. */
+import type { RundownView } from '../lib/rundown-view.ts';
+interface Props {
+  view: RundownView;
+}
+const { view } = Astro.props;
+---
+
+<table class="grid">
+  <thead>
+    <tr>
+      <td></td>
+      {view.bottles.map((b) => <th scope="col">{b.short}</th>)}
+    </tr>
+  </thead>
+  <tbody>
+    {
+      view.attributes.map((attribute) => (
+        <tr>
+          <th scope="row">{attribute.label}</th>
+          {attribute.cells.map((cell) => (
+            <td class={`num ${cell.best ? 'best' : ''}`}>
+              {cell.score}
+              {cell.best && <span class="visually-hidden"> (highest)</span>}
+            </td>
+          ))}
+        </tr>
+      ))
+    }
+    <tr class="overall">
+      <th scope="row">Overall</th>
+      {
+        view.overall.map((cell) => (
+          <td class={`num ${cell.best ? 'best' : ''}`}>
+            {cell.score}
+            {cell.best && <span class="visually-hidden"> (highest)</span>}
+          </td>
+        ))
+      }
+    </tr>
+    {
+      view.facts.map((fact) => (
+        <tr class="fact">
+          <th scope="row">{fact.label}</th>
+          {fact.values.map((value) => <td>{value}</td>)}
+        </tr>
+      ))
+    }
+  </tbody>
+</table>
+
+<style>
+  .grid {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+  }
+  thead td,
+  tbody th {
+    width: 3.75rem;
+  }
+  th,
+  td {
+    padding: 0.75rem 0.125rem;
+    text-align: center;
+    border-top: 1px solid var(--rule);
+  }
+  thead th,
+  thead td {
+    border-top: none;
+    font-size: 0.75rem;
+    font-weight: 400;
+    line-height: 1.25;
+    color: var(--ash-light);
+    vertical-align: bottom;
+    overflow-wrap: anywhere;
+    hyphens: auto;
+  }
+  tbody th {
+    text-align: left;
+    font-size: var(--text-sm);
+    font-weight: 400;
+    color: var(--ash-light);
+  }
+  .num {
+    font-family: var(--font-mono);
+    font-size: 1rem;
+  }
+  .best {
+    color: var(--gold);
+  }
+  .overall th {
+    color: var(--bone);
+    font-weight: 600;
+  }
+  .overall td {
+    font-size: 1.25rem;
+  }
+  .overall th,
+  .overall td {
+    border-top-color: var(--border);
+  }
+  .fact th,
+  .fact td {
+    font-size: 0.75rem;
+    color: var(--ash);
+    padding-block: 0.5rem;
+  }
+  .fact + .fact th,
+  .fact + .fact td {
+    border-top: none;
+    padding-top: 0;
+  }
+</style>

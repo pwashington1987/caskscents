@@ -1,6 +1,7 @@
 ---
 draft: true
 name: "Sample: Grey Suede"
+shortName: "Grey Suede"
 house: "Example Parfums"
 year: 2019
 concentration: Eau de Parfum

@@ -1,0 +1,144 @@
+---
+/**
+ * The side-by-side table for wide screens: a column per bottle, a row per
+ * scored attribute, and under every score a line saying why.
+ */
+import { href } from '../lib/href.ts';
+import { reviewPath } from '../lib/paths.ts';
+import type { RundownView } from '../lib/rundown-view.ts';
+interface Props {
+  view: RundownView;
+}
+const { view } = Astro.props;
+---
+
+<div class="scroll">
+  <table>
+    <thead>
+      <tr>
+        <td></td>
+        {
+          view.bottles.map((b) => (
+            <th scope="col">
+              <a class="display" href={href(reviewPath(view.world, b.id))}>{b.name}</a>
+            </th>
+          ))
+        }
+      </tr>
+    </thead>
+    <tbody>
+      {
+        view.facts.map((fact) => (
+          <tr class="fact">
+            <th scope="row">{fact.label}</th>
+            {fact.values.map((value) => <td>{value}</td>)}
+          </tr>
+        ))
+      }
+      {
+        view.attributes.map((attribute) => (
+          <tr>
+            <th scope="row">{attribute.label}</th>
+            {attribute.cells.map((cell) => (
+              <td>
+                <span class={`num ${cell.best ? 'best' : ''}`}>{cell.score}</span>
+                {cell.best && <span class="visually-hidden"> (highest)</span>}
+                <span class="note">{cell.note}</span>
+              </td>
+            ))}
+          </tr>
+        ))
+      }
+      <tr class="overall">
+        <th scope="row">Overall</th>
+        {
+          view.overall.map((cell) => (
+            <td>
+              <span class={`num ${cell.best ? 'best' : ''}`}>{cell.score}</span>
+              {cell.best && <span class="visually-hidden"> (highest)</span>}
+            </td>
+          ))
+        }
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<style>
+  .scroll {
+    overflow-x: auto;
+  }
+  table {
+    width: 100%;
+    min-width: 44rem;
+    border-collapse: collapse;
+    table-layout: fixed;
+  }
+  thead td,
+  tbody th {
+    width: 8.5rem;
+  }
+  th,
+  td {
+    text-align: left;
+    vertical-align: top;
+    padding: 1rem 1.25rem;
+    border-top: 1px solid var(--rule);
+  }
+  thead th,
+  thead td {
+    border-top: none;
+    padding-bottom: 0.875rem;
+  }
+  thead th a {
+    font-size: 1.1875rem;
+    font-weight: 300;
+    line-height: 1.2;
+  }
+  tbody th {
+    font-size: var(--text-sm);
+    font-weight: 400;
+    color: var(--ash-light);
+    padding-left: 0;
+  }
+  td + td,
+  th + th,
+  tbody th + td {
+    border-left: 1px solid var(--rule);
+  }
+  .num {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 1.125rem;
+  }
+  .best {
+    color: var(--gold);
+  }
+  .note {
+    display: block;
+    margin-top: 0.375rem;
+    font-size: var(--text-xs);
+    line-height: 1.45;
+    color: var(--ash-light);
+  }
+  .fact td {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--bone-soft);
+    padding-block: 0.75rem;
+  }
+  .fact th {
+    padding-block: 0.75rem;
+  }
+  .overall th {
+    color: var(--bone);
+    font-weight: 600;
+  }
+  .overall .num {
+    font-size: 1.5rem;
+  }
+  .overall th,
+  .overall td {
+    border-top-color: var(--border);
+  }
+</style>

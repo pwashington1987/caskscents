@@ -31,6 +31,7 @@ const price = z.number().positive();
 const slug = z.string().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, 'Use the review file name without ".md".');
 
 const shared = {
+  shortName: z.string().max(16, 'Keep the short name to 16 characters; it labels narrow table columns.').optional(),
   currency: z.string().default('USD'),
   batch: z.string().optional(),
   summary,

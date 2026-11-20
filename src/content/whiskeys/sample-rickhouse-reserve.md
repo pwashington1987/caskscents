@@ -1,6 +1,7 @@
 ---
 draft: true
 name: "Sample: Rickhouse Reserve"
+shortName: "Rickhouse"
 distillery: "Example Distilling Co."
 region: Kentucky
 country: United States

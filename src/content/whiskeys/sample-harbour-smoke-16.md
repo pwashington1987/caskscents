@@ -1,6 +1,7 @@
 ---
 draft: true
 name: "Sample: Harbour Smoke 16"
+shortName: "Harbour 16"
 distillery: "Example Distillery"
 region: Islay
 country: Scotland
