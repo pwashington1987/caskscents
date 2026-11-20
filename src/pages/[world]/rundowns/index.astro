@@ -18,8 +18,7 @@ const rundowns = site.rundownsFor(world).map((r) => ({
   title: r.data.title,
   summary: r.data.summary,
   count: r.data.items.length,
-  pick: r.data.picks[0],
-  winner: site.review(world, r.data.picks[0].winner)?.data.name ?? '',
+  questions: r.data.picks.map((p) => p.useCase),
 }));
 const title = worldTitle(world);
 ---
@@ -49,9 +48,7 @@ const title = worldTitle(world);
               </span>
               <span class="side">
                 <span class="muted">{plural(r.count, 'bottle')}</span>
-                <span class="pick">
-                  {r.pick.useCase}: {r.winner}
-                </span>
+                <span class="pick">{r.questions.join(' · ')}</span>
               </span>
             </a>
           </li>
