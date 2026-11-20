@@ -38,6 +38,7 @@ jobs:
       - name: Link check
         run: npm run links
       - name: Publish the built site to the gh-pages branch
+        if: github.ref == 'refs/heads/main'
         run: |
           cd dist
           touch .nojekyll

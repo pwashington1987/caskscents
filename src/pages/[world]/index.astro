@@ -53,7 +53,7 @@ const rows = world === 'whiskey'
         rundowns.map((r) => (
           <li>
             <span class="name display">{r.data.title}</span>
-            <span class="muted">{r.data.items.length} bottles</span>
+            <span class="muted count">{r.data.items.length} bottles</span>
           </li>
         ))
       }
@@ -119,5 +119,8 @@ const rows = world === 'whiskey'
   }
   .empty {
     padding-block: 1rem;
+  }
+  .count {
+    white-space: nowrap;
   }
 </style>
