@@ -1,14 +1,18 @@
 ---
 /**
- * World home. This is the interim version: plain lists that prove the
- * content loads and validates. The Front Page layout replaces it in
- * milestone 5.
+ * World home, "The Front Page": the latest rundown up top, then the newest
+ * reviews, more rundowns, and ways to browse.
  */
 import Base from '../../layouts/Base.astro';
+import BottleGrid from '../../components/BottleGrid.astro';
+import BottlePhoto from '../../components/BottlePhoto.astro';
 import { getSite } from '../../lib/site.ts';
-import { formatAbv, formatPrice, formatScore, whiskeyTypeLabel } from '../../lib/labels.ts';
+import { listFor } from '../../lib/views.ts';
+import { rundownView } from '../../lib/rundown-view.ts';
+import { FACETS, facetLabel, groupBy } from '../../lib/taxonomy.ts';
 import { href } from '../../lib/href.ts';
-import { reviewPath, rundownPath } from '../../lib/paths.ts';
+import { plural } from '../../lib/labels.ts';
+import { browsePath, rundownPath, rundownsPath, shelfPath, worldTitle } from '../../lib/paths.ts';
 import type { World } from '../../lib/validate.ts';
 
 export function getStaticPaths() {
@@ -17,22 +21,29 @@ export function getStaticPaths() {
 
 const world = Astro.params.world as World;
 const site = await getSite();
-const title = world === 'whiskey' ? 'Whiskey' : 'Fragrance';
-const rundowns = site.rundownsFor(world);
+const title = worldTitle(world);
+const items = listFor(site, world);
+const viewById = new Map(items.map((i) => [i.id, i.view]));
 
-const rows = world === 'whiskey'
-  ? site.whiskeys.map((w) => ({
-      id: w.id,
-      name: w.data.name,
-      meta: [whiskeyTypeLabel(w.data.type, w.data.country), w.data.region, formatAbv(w.data.abv), formatPrice(w.data.price, w.data.currency)].join(' · '),
-      score: formatScore(w.data.ratings.overall),
-    }))
-  : site.fragrances.map((f) => ({
-      id: f.id,
-      name: f.data.name,
-      meta: [f.data.house, f.data.concentration, formatPrice(f.data.price, f.data.currency)].join(' · '),
-      score: formatScore(f.data.ratings.overall),
-    }));
+const rundowns = site.rundownsFor(world).map((r) => ({
+  id: r.id,
+  view: rundownView(
+    r.data,
+    r.data.items.map((slug) => ({ id: slug, view: viewById.get(slug)! })),
+  ),
+}));
+const feature = rundowns[0];
+const moreRundowns = rundowns.slice(1, 6);
+
+const browse = FACETS[world]
+  .filter((facet) => facet.page)
+  .map((facet) => ({
+    facet,
+    groups: groupBy(items.map((i) => ({ id: i.id, facets: i.view.facets })), facet.param),
+  }))
+  .filter((b) => b.groups.length > 0);
+
+const tagline = world === 'whiskey' ? 'What is in the glass' : 'What is on the skin';
 ---
 
 <Base
@@ -42,93 +53,292 @@ const rows = world === 'whiskey'
     : 'Fragrance reviews and side-by-side rundowns, scored honestly.'}
   world={world}
 >
-  <div class="wrap head">
-    <p class="label">{title}</p>
-    <h1 class="display">{world === 'whiskey' ? 'What is in the glass' : 'What is on the skin'}</h1>
-  </div>
+  <h1 class="visually-hidden">{title} reviews and rundowns</h1>
+
+  {
+    feature ? (
+      <section class="wrap feature">
+        <div class="feature-text">
+          <p class="label">Latest rundown · {plural(feature.view.bottles.length, 'bottle')}</p>
+          <h2 class="display feature-title">
+            <a href={href(rundownPath(world, feature.id))}>{feature.view.title}</a>
+          </h2>
+          <p class="premise">{feature.view.summary}</p>
+          <ul class="picks">
+            {feature.view.picks.map((pick) => (
+              <li>
+                <span class="muted">{pick.useCase}</span>
+                <span>{pick.winner}</span>
+              </li>
+            ))}
+          </ul>
+          <a class="read" href={href(rundownPath(world, feature.id))}>
+            Read the rundown <span class="rule" aria-hidden="true" />
+          </a>
+        </div>
+        <ul class="lineup" aria-hidden="true">
+          {feature.view.bottles.map((b) => (
+            <li>
+              <BottlePhoto world={world} name={b.name} image={b.image} width={150} eager />
+            </li>
+          ))}
+        </ul>
+      </section>
+    ) : (
+      <section class="wrap feature plain">
+        <p class="label">{title}</p>
+        <h2 class="display feature-title">{tagline}</h2>
+        <p class="premise">The first rundown is on its way.</p>
+      </section>
+    )
+  }
 
   <section class="section wrap">
-    <h2 class="display">Rundowns</h2>
-    {rundowns.length === 0 && <p class="muted empty">The first rundown is on its way.</p>}
-    <ul class="list">
-      {
-        rundowns.map((r) => (
-          <li>
-            <a class="row" href={href(rundownPath(world, r.id))}>
-              <span class="name display">{r.data.title}</span>
-              <span class="muted count">{r.data.items.length} bottles</span>
-            </a>
-          </li>
-        ))
-      }
-    </ul>
+    <div class="heading-row">
+      <h2 class="display">Latest reviews</h2>
+      {items.length > 0 && <a class="all" href={href(shelfPath(world))}>All {plural(items.length, 'review')}</a>}
+    </div>
+    {
+      items.length > 0 ? (
+        <BottleGrid items={items.slice(0, 4)} />
+      ) : (
+        <p class="muted">The first reviews are on their way.</p>
+      )
+    }
   </section>
 
-  <section class="section wrap">
-    <h2 class="display">Reviews</h2>
-    {rows.length === 0 && <p class="muted empty">The first reviews are on their way.</p>}
-    <ul class="list">
-      {
-        rows.map((row) => (
-          <li>
-            <a class="row" href={href(reviewPath(world, row.id))}>
-              <span class="text">
-                <span class="name display">{row.name}</span>
-                <span class="muted meta">{row.meta}</span>
-              </span>
-              <span class="score">{row.score}</span>
-            </a>
-          </li>
-        ))
-      }
-    </ul>
-  </section>
+  {
+    moreRundowns.length > 0 && (
+      <section class="section wrap rundowns">
+        <div class="rundowns-intro">
+          <h2 class="display">Rundowns</h2>
+          <p class="muted">Two to four bottles, one table, a winner for every reason you might be buying.</p>
+          <a class="all" href={href(rundownsPath(world))}>All {plural(rundowns.length, 'rundown')}</a>
+        </div>
+        <ol>
+          {moreRundowns.map((r, index) => (
+            <li>
+              <a href={href(rundownPath(world, r.id))}>
+                <span class="number muted">{String(index + 1).padStart(2, '0')}</span>
+                <span class="display rundown-title">{r.view.title}</span>
+                <span class="muted count">{plural(r.view.bottles.length, 'bottle')}</span>
+                <span class="winner">{r.view.picks[0].winner}</span>
+              </a>
+            </li>
+          ))}
+        </ol>
+      </section>
+    )
+  }
+
+  {
+    browse.length > 0 && (
+      <section class="section wrap">
+        <h2 class="display">Browse by</h2>
+        <div class="browse">
+          {browse.map(({ facet, groups }) => (
+            <div class="browse-group">
+              <h3 class="muted">{facet.label}</h3>
+              <ul class="chips">
+                {groups.map((group) => (
+                  <li>
+                    <a href={href(browsePath(world, facet.page!, group.slug))}>
+                      {facetLabel(facet, group.label)} <span class="muted">{group.ids.length}</span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </section>
+    )
+  }
 </Base>
 
 <style>
-  .head {
-    padding-block: clamp(2rem, 5vw, 4rem);
+  h2.display {
+    font-size: var(--text-h2);
+  }
+  .feature {
+    display: grid;
+    gap: 2rem;
+    align-items: center;
+    padding-block: clamp(2rem, 5vw, 4.5rem);
+  }
+  .feature-text {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .feature.plain {
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
+    align-items: flex-start;
   }
-  h1 {
+  h2.feature-title {
     font-size: var(--text-4xl);
+    line-height: 1.02;
+    max-width: 16ch;
   }
-  h2 {
-    font-size: var(--text-2xl);
-    margin-bottom: 1rem;
+  .premise {
+    font-size: clamp(1rem, 0.95rem + 0.3vw, 1.125rem);
+    line-height: 1.55;
+    color: var(--bone-soft);
+    max-width: 36rem;
   }
-  .list li {
-    border-top: 1px solid var(--rule);
-  }
-  .row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 1rem;
-    padding-block: 1rem;
-  }
-  .text {
+  .picks {
     display: flex;
     flex-direction: column;
-    gap: 0.125rem;
-    min-width: 0;
+    gap: 0.375rem;
+    font-size: var(--text-sm);
   }
-  .name {
-    font-size: var(--text-xl);
-    line-height: 1.2;
+  .picks li {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 0.625rem;
   }
-  .meta {
+  .read {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: 44px;
+    font-size: var(--text-xs);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--gold);
+    align-self: flex-start;
+  }
+  .rule {
+    display: inline-block;
+    width: 2.5rem;
+    height: 1px;
+    background: currentColor;
+  }
+  .lineup {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: clamp(0.75rem, 3vw, 2rem);
+  }
+  .lineup :global(svg),
+  .lineup :global(img) {
+    width: clamp(3.25rem, 12vw, 5.5rem);
+    height: auto;
+  }
+
+  .heading-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+  }
+  .all {
+    font-size: var(--text-sm);
+    color: var(--ash-light);
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    white-space: nowrap;
+  }
+
+  .rundowns {
+    display: grid;
+    gap: 1.5rem 3rem;
+  }
+  .rundowns-intro {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: flex-start;
+  }
+  .rundowns-intro .all {
+    color: var(--gold);
+  }
+  ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  ol a {
+    display: grid;
+    grid-template-columns: 2.25rem 1fr;
+    gap: 0.25rem 0.75rem;
+    padding-block: 1.125rem;
+    border-top: 1px solid var(--rule);
+    align-items: baseline;
+  }
+  ol li:last-child a {
+    border-bottom: 1px solid var(--rule);
+  }
+  .number {
+    font-family: var(--font-mono);
     font-size: var(--text-xs);
   }
-  .score {
-    font-size: 1.25rem;
+  .rundown-title {
+    font-size: clamp(1.375rem, 1.2rem + 0.6vw, 1.625rem);
+    line-height: 1.15;
+    color: var(--bone);
   }
-  .empty {
-    padding-block: 1rem;
+  .count,
+  .winner {
+    grid-column: 2;
+    font-size: var(--text-xs);
   }
-  .count {
-    white-space: nowrap;
+  .winner {
+    color: var(--accent-text);
+  }
+
+  .browse {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-top: 1.25rem;
+  }
+  h3 {
+    font-size: var(--text-xs);
+    font-weight: 400;
+    margin: 0 0 0.625rem;
+  }
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.625rem;
+  }
+  .chips a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 44px;
+    padding: 0 1.125rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: var(--text-sm);
+    transition: border-color 200ms var(--ease);
+  }
+  .chips a:hover {
+    border-color: var(--accent-text);
+  }
+
+  @media (min-width: 860px) {
+    .feature {
+      grid-template-columns: 7fr 5fr;
+    }
+    .rundowns {
+      grid-template-columns: 4fr 8fr;
+    }
+    ol a {
+      grid-template-columns: 2.5rem 1fr auto 12rem;
+      gap: 1rem;
+    }
+    .count,
+    .winner {
+      grid-column: auto;
+    }
+    .winner {
+      text-align: right;
+    }
   }
 </style>

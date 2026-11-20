@@ -86,6 +86,10 @@ export type ReviewView = {
   brand: string;
   group: string;
   compareFacts: { label: string; value: string }[];
+  /** Used on cards, the shelf and the browse pages. */
+  cardMeta: string;
+  facets: Record<string, string[]>;
+  sort: { score: number; price: number; date: number };
 };
 
 const capital = (word: string) => word[0].toUpperCase() + word.slice(1);
@@ -159,11 +163,20 @@ export function whiskeyView(d: WhiskeyData): ReviewView {
       { label: 'ABV', value: formatAbv(d.abv) },
       { label: 'Paid', value: formatPrice(d.price, d.currency) },
     ],
+    cardMeta: [
+      whiskeyTypeLabel(d.type, d.country),
+      d.region,
+      formatAbv(d.abv),
+      formatPrice(d.price, d.currency),
+    ].join(' · '),
+    facets: { region: [d.region], type: [d.type], style: d.tags },
+    sort: { score: d.ratings.overall, price: d.price, date: d.reviewedDate.valueOf() },
   };
 }
 
 export function fragranceView(d: FragranceData): ReviewView {
   const accords = [...d.accords].sort((a, b) => b.weight - a.weight);
+  const family = accord(accords[0].label)?.family ?? '';
   const seasons = (['winter', 'spring', 'summer', 'autumn'] as const)
     .map((s) => ({ label: capital(s), percent: d.profile.seasons[s] }))
     .sort((a, b) => b.percent - a.percent);
@@ -215,10 +228,13 @@ export function fragranceView(d: FragranceData): ReviewView {
     features: [...accords.map((a) => a.label), ...d.tags, `house:${d.house}`],
     shortName: d.shortName,
     brand: d.house,
-    group: accord(accords[0].label)?.family ?? '',
+    group: family,
     compareFacts: [
       { label: 'Size', value: `${d.volumeMl} ml` },
       { label: 'Paid', value: formatPrice(d.price, d.currency) },
     ],
+    cardMeta: [d.house, d.concentration, formatPrice(d.price, d.currency)].join(' · '),
+    facets: { house: [d.house], family: [family], tag: d.tags },
+    sort: { score: d.ratings.overall, price: d.price, date: d.reviewedDate.valueOf() },
   };
 }

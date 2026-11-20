@@ -1,0 +1,211 @@
+---
+/**
+ * The shelf: every review in a world, with search, filters and sorting.
+ * All bottles are in the page itself, so it works without scripts; the
+ * script narrows and reorders them and keeps the choice in the address.
+ */
+import Base from '../../../layouts/Base.astro';
+import BottleGrid from '../../../components/BottleGrid.astro';
+import ShelfFilters from '../../../components/ShelfFilters.astro';
+import { getSite } from '../../../lib/site.ts';
+import { listFor } from '../../../lib/views.ts';
+import { FACETS, groupBy } from '../../../lib/taxonomy.ts';
+import { plural } from '../../../lib/labels.ts';
+import { worldTitle } from '../../../lib/paths.ts';
+import type { ShelfItem } from '../../../lib/shelf.ts';
+import type { World } from '../../../lib/validate.ts';
+
+export function getStaticPaths() {
+  return [{ params: { world: 'whiskey' } }, { params: { world: 'fragrance' } }];
+}
+
+const world = Astro.params.world as World;
+const site = await getSite();
+const items = listFor(site, world);
+const facets = FACETS[world].map((facet) => ({
+  facet,
+  groups: groupBy(items.map((i) => ({ id: i.id, facets: i.view.facets })), facet.param),
+}));
+
+const shelfItems: ShelfItem[] = items.map(({ id, view }) => ({
+  id,
+  name: view.name,
+  search: [
+    view.name,
+    view.brand,
+    view.cardMeta,
+    view.summary,
+    ...view.bars.items.map((b) => b.label),
+    ...view.notes.rows.flatMap((r) => r.pills ?? []),
+    ...Object.values(view.facets).flat(),
+  ]
+    .join(' ')
+    .toLowerCase(),
+  score: view.sort.score,
+  price: view.sort.price,
+  date: view.sort.date,
+  facets: view.facets,
+}));
+const payload = JSON.stringify({
+  items: shelfItems,
+  params: FACETS[world].map((f) => f.param),
+  pageSize: 24,
+}).replace(/</g, '\\u003c');
+const title = worldTitle(world);
+---
+
+<Base
+  title={`${title} reviews`}
+  description={`Every ${world} review on CaskScents. Search, filter and sort the whole shelf.`}
+  world={world}
+>
+  <div data-shelf>
+    <header class="wrap head">
+      <p class="label">{title}</p>
+      <h1 class="display">The shelf</h1>
+      <p class="muted" data-count>{plural(items.length, 'bottle')}</p>
+    </header>
+
+    {
+      items.length > 0 ? (
+        <>
+          <div class="wrap controls">
+            <ShelfFilters facets={facets} />
+          </div>
+          <section class="wrap results">
+            <BottleGrid items={items} />
+            <p class="muted empty" data-empty hidden>
+              Nothing on the shelf matches that. Try fewer filters or a different word.
+            </p>
+            <button class="more" type="button" data-more hidden>
+              Show more
+            </button>
+          </section>
+          <script type="application/json" id="shelf-data" set:html={payload} />
+        </>
+      ) : (
+        <p class="wrap muted empty">The first reviews are on their way.</p>
+      )
+    }
+  </div>
+</Base>
+
+<script>
+  import { applyShelf, parseState, toQuery, type ShelfItem, type ShelfState } from '../../../lib/shelf.ts';
+
+  const root = document.querySelector<HTMLElement>('[data-shelf]');
+  const dataEl = document.getElementById('shelf-data');
+  const form = root?.querySelector<HTMLFormElement>('[data-filters]');
+  const list = root?.querySelector<HTMLElement>('.bottle-grid');
+
+  if (root && dataEl && form && list) {
+    const { items, params, pageSize } = JSON.parse(dataEl.textContent ?? '{}') as {
+      items: ShelfItem[];
+      params: string[];
+      pageSize: number;
+    };
+    const cards = new Map(
+      [...list.querySelectorAll<HTMLElement>('li[data-id]')].map((li) => [li.dataset.id ?? '', li]),
+    );
+    const count = root.querySelector<HTMLElement>('[data-count]');
+    const empty = root.querySelector<HTMLElement>('[data-empty]');
+    const more = root.querySelector<HTMLButtonElement>('[data-more]');
+    const reset = root.querySelector<HTMLButtonElement>('[data-reset]');
+    const control = (name: string) =>
+      form.elements.namedItem(name) as HTMLInputElement | HTMLSelectElement | null;
+    let limit = pageSize;
+
+    const read = (): ShelfState => {
+      const search = new URLSearchParams();
+      search.set('q', control('q')?.value ?? '');
+      search.set('sort', control('sort')?.value ?? '');
+      for (const param of params) search.set(param, control(param)?.value ?? '');
+      return parseState(search.toString(), params);
+    };
+
+    const write = (state: ShelfState) => {
+      const q = control('q');
+      if (q) q.value = state.q;
+      const sort = control('sort');
+      if (sort) sort.value = state.sort;
+      for (const param of params) {
+        const select = control(param);
+        if (select) select.value = state.filters[param] ?? '';
+      }
+    };
+
+    const render = (state: ShelfState) => {
+      const ids = applyShelf(items, state);
+      const shown = new Set(ids.slice(0, limit));
+      for (const [id, card] of cards) card.hidden = !shown.has(id);
+      for (const id of ids) {
+        const card = cards.get(id);
+        if (card) list.append(card);
+      }
+      if (count) count.textContent = `${ids.length} ${ids.length === 1 ? 'bottle' : 'bottles'}`;
+      if (empty) empty.hidden = ids.length > 0;
+      if (more) more.hidden = ids.length <= limit;
+      if (reset) reset.hidden = toQuery(state) === '';
+    };
+
+    const update = () => {
+      limit = pageSize;
+      const state = read();
+      history.replaceState(null, '', window.location.pathname + toQuery(state));
+      render(state);
+    };
+
+    form.addEventListener('input', update);
+    form.addEventListener('submit', (event) => event.preventDefault());
+    form.addEventListener('reset', () => window.setTimeout(update));
+    more?.addEventListener('click', () => {
+      limit += pageSize;
+      render(read());
+    });
+    window.addEventListener('popstate', () => {
+      const state = parseState(window.location.search, params);
+      write(state);
+      render(state);
+    });
+
+    const initial = parseState(window.location.search, params);
+    write(initial);
+    render(initial);
+    if (window.location.hash === '#search') control('q')?.focus();
+  }
+</script>
+
+<style>
+  .head {
+    padding-block: clamp(1.75rem, 4vw, 3.5rem) 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  h1 {
+    font-size: var(--text-4xl);
+  }
+  .controls {
+    padding-block: 1rem 1.5rem;
+    border-top: 1px solid var(--rule);
+  }
+  .results {
+    padding-bottom: var(--section-pad);
+  }
+  .empty {
+    padding-block: 2rem;
+  }
+  .more {
+    display: block;
+    margin: 2rem auto 0;
+    min-height: 48px;
+    padding: 0 2rem;
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .more:hover {
+    border-color: var(--accent-text);
+  }
+</style>

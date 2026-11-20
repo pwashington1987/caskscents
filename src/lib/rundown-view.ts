@@ -95,13 +95,17 @@ export function rundownView(data: RundownData, items: RundownItem[]): RundownVie
     values: items.map((i) => i.view.compareFacts[index].value),
   }));
 
+  // Only compare a flavor or accord that at least two of the bottles have.
   const strongest = new Map<string, number>();
+  const holders = new Map<string, number>();
   for (const { view } of items) {
     for (const bar of view.bars.items) {
       strongest.set(bar.label, Math.max(strongest.get(bar.label) ?? 0, bar.percent));
+      holders.set(bar.label, (holders.get(bar.label) ?? 0) + 1);
     }
   }
   const profileGroups = [...strongest.entries()]
+    .filter(([label]) => (holders.get(label) ?? 0) >= 2)
     .sort((x, y) => y[1] - x[1])
     .slice(0, MAX_PROFILE_GROUPS)
     .map(([label]) => ({

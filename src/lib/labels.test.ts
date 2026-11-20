@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { whiskeyTypeLabel, formatPrice, formatAbv, formatDate } from './labels.ts';
+import { whiskeyTypeLabel, formatPrice, formatAbv, formatDate, tagLabel, plural } from './labels.ts';
 
 test('adds whisky or whiskey to types that need the noun', () => {
   assert.equal(whiskeyTypeLabel('Single malt', 'Scotland'), 'Single malt whisky');
@@ -27,4 +27,17 @@ test('ABV keeps a decimal only when it has one', () => {
 
 test('dates read as month and year', () => {
   assert.equal(formatDate(new Date('2026-11-18T00:00:00Z')), 'Nov 2026');
+});
+
+test('tags read as plain words', () => {
+  assert.equal(tagLabel('bottled-in-bond'), 'Bottled in bond');
+  assert.equal(tagLabel('peated'), 'Peated');
+  assert.equal(tagLabel('under-50'), 'Under $50');
+  assert.equal(tagLabel('under-100'), 'Under $100');
+});
+
+test('counts read naturally', () => {
+  assert.equal(plural(1, 'bottle'), '1 bottle');
+  assert.equal(plural(3, 'bottle'), '3 bottles');
+  assert.equal(plural(0, 'review'), '0 reviews');
 });

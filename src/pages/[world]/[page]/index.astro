@@ -1,0 +1,92 @@
+---
+/** A browse index, such as every whiskey region or every fragrance house. */
+import Base from '../../../layouts/Base.astro';
+import { getSite } from '../../../lib/site.ts';
+import { listFor } from '../../../lib/views.ts';
+import { FACETS, facetLabel, groupBy, pageTitle } from '../../../lib/taxonomy.ts';
+import { href } from '../../../lib/href.ts';
+import { plural } from '../../../lib/labels.ts';
+import { browsePath, worldTitle } from '../../../lib/paths.ts';
+import type { World } from '../../../lib/validate.ts';
+
+export function getStaticPaths() {
+  return (['whiskey', 'fragrance'] as const).flatMap((world) =>
+    FACETS[world].filter((f) => f.page).map((f) => ({ params: { world, page: f.page } })),
+  );
+}
+
+const world = Astro.params.world as World;
+const page = Astro.params.page as string;
+const facet = FACETS[world].find((f) => f.page === page)!;
+const site = await getSite();
+const groups = groupBy(
+  listFor(site, world).map((i) => ({ id: i.id, facets: i.view.facets })),
+  facet.param,
+);
+const heading = pageTitle(page);
+---
+
+<Base
+  title={`${worldTitle(world)} ${page}`}
+  description={`Browse ${world} reviews by ${facet.label.toLowerCase()}.`}
+  world={world}
+>
+  <header class="wrap head">
+    <p class="label">{worldTitle(world)}</p>
+    <h1 class="display">{heading}</h1>
+  </header>
+  <section class="wrap list">
+    {groups.length === 0 && <p class="muted">Nothing here yet. The first reviews are on their way.</p>}
+    <ul>
+      {
+        groups.map((group) => (
+          <li>
+            <a href={href(browsePath(world, page, group.slug))}>
+              <span class="display name">{facetLabel(facet, group.label)}</span>
+              <span class="muted count">{plural(group.ids.length, 'bottle')}</span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</Base>
+
+<style>
+  .head {
+    padding-block: clamp(1.75rem, 4vw, 3.5rem) 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  h1 {
+    font-size: var(--text-4xl);
+  }
+  .list {
+    padding-bottom: var(--section-pad);
+  }
+  ul {
+    display: grid;
+    gap: 0 3rem;
+  }
+  a {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    padding-block: 1rem;
+    border-top: 1px solid var(--rule);
+  }
+  .name {
+    font-size: 1.5rem;
+  }
+  .count {
+    font-size: var(--text-xs);
+    white-space: nowrap;
+  }
+  @media (min-width: 860px) {
+    ul {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+</style>

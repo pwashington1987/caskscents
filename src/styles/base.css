@@ -112,6 +112,10 @@ select {
   border-top: 1px solid var(--rule);
 }
 
+[hidden] {
+  display: none !important;
+}
+
 .visually-hidden {
   position: absolute;
   width: 1px;

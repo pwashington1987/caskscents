@@ -1,0 +1,39 @@
+---
+/** A list of bottles: rows on phones, a grid of cards on wide screens. */
+import BottleCard from './BottleCard.astro';
+import type { Listed } from '../lib/views.ts';
+interface Props {
+  items: Listed[];
+  summary?: boolean;
+}
+const { items, summary = true } = Astro.props;
+---
+
+<ul class="bottle-grid">
+  {
+    items.map((item) => (
+      <li data-id={item.id}>
+        <BottleCard id={item.id} view={item.view} summary={summary} />
+      </li>
+    ))
+  }
+</ul>
+
+<style>
+  .bottle-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0 1.75rem;
+  }
+  @media (min-width: 720px) {
+    .bottle-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      row-gap: 1rem;
+    }
+  }
+  @media (min-width: 1000px) {
+    .bottle-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+</style>

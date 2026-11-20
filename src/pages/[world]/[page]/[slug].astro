@@ -1,0 +1,89 @@
+---
+/** One browse page, such as every Islay whisky or every bottle from one house. */
+import Base from '../../../layouts/Base.astro';
+import BottleGrid from '../../../components/BottleGrid.astro';
+import { getSite } from '../../../lib/site.ts';
+import { listFor } from '../../../lib/views.ts';
+import { FACETS, facetLabel, groupBy } from '../../../lib/taxonomy.ts';
+import { href } from '../../../lib/href.ts';
+import { plural } from '../../../lib/labels.ts';
+import { browseIndexPath, shelfPath, worldTitle } from '../../../lib/paths.ts';
+import type { World } from '../../../lib/validate.ts';
+
+export async function getStaticPaths() {
+  const site = await getSite();
+  return (['whiskey', 'fragrance'] as const).flatMap((world) => {
+    const items = listFor(site, world).map((i) => ({ id: i.id, facets: i.view.facets }));
+    return FACETS[world]
+      .filter((f) => f.page)
+      .flatMap((facet) =>
+        groupBy(items, facet.param).map((group) => ({
+          params: { world, page: facet.page, slug: group.slug },
+          props: { value: group.label, ids: group.ids },
+        })),
+      );
+  });
+}
+
+interface Props {
+  value: string;
+  ids: string[];
+}
+const { value, ids } = Astro.props;
+const world = Astro.params.world as World;
+const page = Astro.params.page as string;
+const facet = FACETS[world].find((f) => f.page === page)!;
+const site = await getSite();
+const items = listFor(site, world).filter((i) => ids.includes(i.id));
+const label = facetLabel(facet, value);
+---
+
+<Base
+  title={`${label} · ${worldTitle(world)}`}
+  description={`${plural(items.length, `${world} review`)} filed under ${label}.`}
+  world={world}
+>
+  <header class="wrap head">
+    <p class="label">
+      <a href={href(browseIndexPath(world, page))}>{facet.label}</a>
+    </p>
+    <h1 class="display">{label}</h1>
+    <p class="muted">{plural(items.length, 'bottle')}</p>
+  </header>
+  <section class="wrap list">
+    <BottleGrid items={items} />
+    <p class="all">
+      <a href={href(shelfPath(world))}>See the whole shelf</a>
+    </p>
+  </section>
+</Base>
+
+<style>
+  .head {
+    padding-block: clamp(1.75rem, 4vw, 3.5rem) 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .label a {
+    color: inherit;
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+  }
+  h1 {
+    font-size: var(--text-4xl);
+  }
+  .list {
+    padding-bottom: var(--section-pad);
+  }
+  .all {
+    margin-top: 2rem;
+    color: var(--accent-text);
+  }
+  .all a {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+  }
+</style>

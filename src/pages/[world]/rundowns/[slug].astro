@@ -84,11 +84,16 @@ const { Content } = await render(rundown);
       <CompareAccordion view={view} />
     </section>
 
-    <section class="section wrap story">
-      <div>
-        <h2 class="display">{view.profile.title}</h2>
-        <ProfileCompare groups={view.profile.groups} />
-      </div>
+    <section class={`section wrap story ${view.profile.groups.length ? 'with-profile' : ''}`}>
+      {
+        view.profile.groups.length > 0 && (
+          <div>
+            <h2 class="display">{view.profile.title}</h2>
+            <p class="muted caption below">What these bottles have in common.</p>
+            <ProfileCompare groups={view.profile.groups} />
+          </div>
+        )
+      }
       <div class="prose">
         <h2 class="display">How it went</h2>
         <Content />
@@ -238,7 +243,7 @@ const { Content } = await render(rundown);
     .narrow-only {
       display: none;
     }
-    .story {
+    .story.with-profile {
       grid-template-columns: 5fr 7fr;
     }
     .reviews {

@@ -143,12 +143,10 @@ test('fact rows line up one value per bottle', () => {
   ]);
 });
 
-test('the profile compares each flavor across bottles, strongest flavor first, with zero where absent', () => {
+test('the profile compares only what at least two bottles share, strongest first, with zero where absent', () => {
   const v = rundownView(data({ items: ['a', 'b', 'c'] }), [a, b, c]);
   assert.equal(v.profile.title, 'Flavor profile');
-  assert.deepEqual(v.profile.groups.map((g) => g.label), [
-    'Peat and smoke', 'Caramel and toffee', 'Sweet and sherry', 'Citrus',
-  ]);
+  assert.deepEqual(v.profile.groups.map((g) => g.label), ['Peat and smoke']);
   assert.deepEqual(v.profile.groups[0].rows, [
     { short: 'Alpha', percent: 92 },
     { short: 'Beta', percent: 98 },
@@ -156,10 +154,14 @@ test('the profile compares each flavor across bottles, strongest flavor first, w
   ]);
 });
 
+test('the profile is empty when the bottles share nothing', () => {
+  assert.deepEqual(rundownView(data({ items: ['a', 'c'] }), [a, c]).profile.groups, []);
+});
+
 test('the profile keeps at most five groups', () => {
-  const many = item('a', {
-    name: 'Alpha 16',
-    flavorProfile: ['Peat and smoke', 'Honey', 'Citrus', 'Floral', 'Nutty', 'Wine cask'].map((label, i) => ({ label, intensity: 90 - i * 10 })),
-  });
-  assert.equal(rundownView(data(), [many, b]).profile.groups.length, 5);
+  const labels = ['Peat and smoke', 'Honey', 'Citrus', 'Floral', 'Nutty', 'Wine cask'];
+  const flavorProfile = labels.map((label, i) => ({ label, intensity: 90 - i * 10 }));
+  const one = item('a', { name: 'Alpha 16', flavorProfile });
+  const two = item('b', { name: 'Beta 10', distillery: 'Beta', flavorProfile });
+  assert.equal(rundownView(data(), [one, two]).profile.groups.length, 5);
 });

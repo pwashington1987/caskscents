@@ -29,3 +29,19 @@ export function formatDate(date: Date): string {
 export function formatScore(score: number): string {
   return score.toFixed(1);
 }
+
+const TAG_LABELS: Record<string, string> = {
+  'under-50': 'Under $50',
+  'under-100': 'Under $100',
+};
+
+/** "bottled-in-bond" reads "Bottled in bond". */
+export function tagLabel(tag: string): string {
+  if (TAG_LABELS[tag]) return TAG_LABELS[tag];
+  const words = tag.replace(/-/g, ' ');
+  return words[0].toUpperCase() + words.slice(1);
+}
+
+export function plural(count: number, noun: string): string {
+  return `${count} ${noun}${count === 1 ? '' : 's'}`;
+}

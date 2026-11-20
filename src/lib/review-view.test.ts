@@ -171,3 +171,15 @@ test('details used when bottles are compared in a rundown', () => {
     { label: 'Paid', value: '$195' },
   ]);
 });
+
+test('details used on cards, the shelf and browse pages', () => {
+  const w = whiskeyView(whiskey);
+  assert.equal(w.cardMeta, 'Single malt whisky · Islay · 43% · $110');
+  assert.deepEqual(w.facets, { region: ['Islay'], type: ['Single malt'], style: ['peated'] });
+  assert.deepEqual(w.sort, { score: 9.1, price: 110, date: Date.UTC(2026, 10, 18) });
+
+  const f = fragranceView(fragrance);
+  assert.equal(f.cardMeta, 'Example Parfums · Eau de Parfum · $195');
+  assert.deepEqual(f.facets, { house: ['Example Parfums'], family: ['Gourmand'], tag: ['niche'] });
+  assert.equal(f.sort.price, 195);
+});
