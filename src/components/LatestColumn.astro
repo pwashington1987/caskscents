@@ -1,0 +1,116 @@
+---
+/** One world's half of "The latest from both worlds" on the gateway. */
+import BottleCard from './BottleCard.astro';
+import { href } from '../lib/href.ts';
+import { plural } from '../lib/labels.ts';
+import { rundownPath, worldPath, worldTitle } from '../lib/paths.ts';
+import type { RundownView } from '../lib/rundown-view.ts';
+import type { Listed } from '../lib/views.ts';
+import type { World } from '../lib/validate.ts';
+interface Props {
+  world: World;
+  rundown?: { id: string; view: RundownView };
+  reviews: Listed[];
+}
+const { world, rundown, reviews } = Astro.props;
+const title = worldTitle(world);
+const empty = !rundown && reviews.length === 0;
+---
+
+<section class="column" data-world={world}>
+  <div class="top">
+    <h3 class="label">{title}</h3>
+    <a class="all" href={href(worldPath(world))}>All {title.toLowerCase()}</a>
+  </div>
+
+  {empty && <p class="muted">The first {world} reviews are on their way.</p>}
+
+  {
+    rundown && (
+      <a class="feature" href={href(rundownPath(world, rundown.id))}>
+        <span class="muted kicker">New rundown · {plural(rundown.view.bottles.length, 'bottle')}</span>
+        <span class="display title">{rundown.view.title}</span>
+        <span class="premise">{rundown.view.summary}</span>
+        <span class="pick">
+          {rundown.view.picks[0].useCase}: {rundown.view.picks[0].winner}
+        </span>
+      </a>
+    )
+  }
+
+  {
+    reviews.length > 0 && (
+      <ul class="rows">
+        {reviews.map((item) => (
+          <li>
+            <BottleCard id={item.id} view={item.view} summary={false} row />
+          </li>
+        ))}
+      </ul>
+    )
+  }
+</section>
+
+<style>
+  /* Each column carries its own world's colors, whatever page it sits on. */
+  .column[data-world='whiskey'] {
+    --accent: #b8702e;
+    --accent-text: #e09a3a;
+  }
+  .column[data-world='fragrance'] {
+    --accent: #c98a7e;
+    --accent-text: #c98a7e;
+  }
+  .column {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  .top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+  }
+  h3 {
+    margin: 0;
+    font-weight: 400;
+  }
+  .all {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font-size: var(--text-sm);
+    color: var(--ash-light);
+  }
+  .feature {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+    color: var(--bone);
+  }
+  .kicker {
+    font-size: var(--text-xs);
+  }
+  .title {
+    font-size: clamp(1.875rem, 1.5rem + 1.4vw, 2.5rem);
+    line-height: 1.08;
+    transition: color 200ms var(--ease);
+  }
+  .feature:hover .title {
+    color: var(--accent-text);
+  }
+  .premise {
+    font-size: clamp(0.9375rem, 0.9rem + 0.2vw, 1rem);
+    line-height: 1.55;
+    color: var(--bone-soft);
+    max-width: 32rem;
+  }
+  .pick {
+    font-size: var(--text-sm);
+    color: var(--accent-text);
+  }
+  .rows li:last-child {
+    border-bottom: 1px solid var(--rule);
+  }
+</style>

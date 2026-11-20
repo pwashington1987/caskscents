@@ -12,11 +12,13 @@ interface Props {
   view: ReviewView;
   /** Show the one-line summary under the meta line on wide screens. */
   summary?: boolean;
+  /** Stay a compact row at every width. */
+  row?: boolean;
 }
-const { id, view, summary = true } = Astro.props;
+const { id, view, summary = true, row = false } = Astro.props;
 ---
 
-<a class="card" href={href(reviewPath(view.world, id))}>
+<a class={`card ${row ? 'row-only' : ''}`} href={href(reviewPath(view.world, id))}>
   <span class="photo">
     <BottlePhoto world={view.world} name={view.name} image={view.image} width={120} />
   </span>
@@ -86,26 +88,26 @@ const { id, view, summary = true } = Astro.props;
   }
 
   @media (min-width: 720px) {
-    .card {
+    .card:not(.row-only) {
       flex-direction: column;
       align-items: stretch;
       gap: 1.25rem;
       padding-block: 1.5rem 0.5rem;
     }
-    .photo {
+    .card:not(.row-only) .photo {
       width: auto;
       height: 11rem;
       align-items: flex-end;
     }
-    .photo :global(svg),
-    .photo :global(img) {
+    .card:not(.row-only) .photo :global(svg),
+    .card:not(.row-only) .photo :global(img) {
       width: auto;
       height: 100%;
     }
-    .name {
+    .card:not(.row-only) .name {
       font-size: 1.375rem;
     }
-    .summary {
+    .card:not(.row-only) .summary {
       display: block;
       margin-top: 0.25rem;
     }

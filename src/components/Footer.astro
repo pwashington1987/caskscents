@@ -1,5 +1,6 @@
 ---
 /** The closing line on every page. The whiskey world adds a drinking note. */
+import { href } from '../lib/href.ts';
 import type { World } from '../lib/validate.ts';
 interface Props {
   world: World | null;
@@ -14,6 +15,9 @@ const sense = world === 'fragrance' ? 'nose' : world === 'whiskey' ? 'palate' : 
     Scores are one person's {sense}. Prices are what I paid.
     {world !== 'fragrance' && ' Please drink responsibly.'}
   </p>
+  <nav aria-label="About">
+    <a href={href('/about/scoring/')}>How I score</a>
+  </nav>
 </footer>
 
 <style>
@@ -27,6 +31,12 @@ const sense = world === 'fragrance' ? 'nose' : world === 'whiskey' ? 'palate' : 
     border-top: 1px solid var(--rule);
     color: var(--ash);
     font-size: var(--text-xs);
+  }
+  nav a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: var(--ash-light);
   }
   .name {
     font-family: var(--font-logo);

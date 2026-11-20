@@ -1,0 +1,374 @@
+---
+/**
+ * The gateway's first screen. Wide screens get the photograph with the seal
+ * in its dark middle and a caption beside each object; each half of the
+ * picture is one link. Phones get the seal, then the two worlds side by side.
+ */
+import { getImage, Picture } from 'astro:assets';
+import Seal from './Seal.astro';
+import SiteNav from './SiteNav.astro';
+import LineArt from './LineArt.astro';
+import { href } from '../lib/href.ts';
+import wide from '../assets/hero/hero-wide.jpg';
+import glass from '../assets/hero/hero-glass.jpg';
+import bottle from '../assets/hero/hero-bottle.jpg';
+
+const widths = [960, 1440, 1920, 2400];
+const srcset = async (format: 'avif' | 'webp' | 'jpeg') => {
+  const images = await Promise.all(widths.map((width) => getImage({ src: wide, width, format })));
+  return images.map((image, i) => `${image.src} ${widths[i]}w`).join(', ');
+};
+const [avif, webp, jpeg] = await Promise.all([srcset('avif'), srcset('webp'), srcset('jpeg')]);
+const fallback = await getImage({ src: wide, width: 1440, format: 'jpeg' });
+// Phones never download the wide photograph: this stands in for it.
+const BLANK = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
+---
+
+<section class="hero" data-hero>
+  <picture class="bg">
+    <source media="(max-width: 859px)" srcset={BLANK} />
+    <source type="image/avif" srcset={avif} sizes="100vw" />
+    <source type="image/webp" srcset={webp} sizes="100vw" />
+    <img
+      src={fallback.src}
+      srcset={jpeg}
+      sizes="100vw"
+      width={wide.width}
+      height={wide.height}
+      alt="A Glencairn glass of whisky on the left and a perfume bottle on the right, on dark marble"
+      fetchpriority="high"
+      decoding="async"
+      data-hero-image
+    />
+  </picture>
+  <div class="fallback" aria-hidden="true">
+    <span class="art glass"><LineArt kind="glass" width={120} /></span>
+    <span class="art bottle"><LineArt kind="bottle" width={120} /></span>
+  </div>
+  <div class="scrim top" aria-hidden="true"></div>
+  <div class="scrim bottom" aria-hidden="true"></div>
+
+  <div class="nav"><SiteNav world={null} /></div>
+
+  <div class="center">
+    <Seal size={250} open label="The CaskScents seal" />
+    <h1 class="display">Honest reviews of what you pour and what you wear.</h1>
+  </div>
+
+  <div class="sides">
+    <a class="side whiskey" href={href('/whiskey/')} aria-label="Whiskey reviews and rundowns">
+      <Picture
+        class="tile"
+        src={glass}
+        formats={['avif', 'webp']}
+        widths={[360, 720]}
+        sizes="50vw"
+        alt=""
+        loading="lazy"
+      />
+      <span class="caption">
+        <span class="line"></span>
+        <span class="word">Whiskey</span>
+      </span>
+    </a>
+    <a class="side fragrance" href={href('/fragrance/')} aria-label="Fragrance reviews and rundowns">
+      <Picture
+        class="tile"
+        src={bottle}
+        formats={['avif', 'webp']}
+        widths={[360, 720]}
+        sizes="50vw"
+        alt=""
+        loading="lazy"
+      />
+      <span class="caption">
+        <span class="word">Fragrance</span>
+        <span class="line"></span>
+      </span>
+    </a>
+  </div>
+</section>
+
+<script>
+  // If the photograph cannot load, show the line drawings instead.
+  const hero = document.querySelector<HTMLElement>('[data-hero]');
+  const image = document.querySelector<HTMLImageElement>('[data-hero-image]');
+  if (hero && image) {
+    const failed = () => hero.classList.add('no-image');
+    image.addEventListener('error', failed);
+    if (image.complete && image.naturalWidth === 0) failed();
+  }
+</script>
+
+<style>
+  .hero {
+    position: relative;
+    background: var(--ink);
+  }
+
+  /* Phones first: seal, tagline, then the two worlds side by side. */
+  .bg,
+  .fallback,
+  .scrim {
+    display: none;
+  }
+  .center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.25rem;
+    padding: 1rem var(--page-pad) 1.75rem;
+    text-align: center;
+  }
+  .center :global(.seal) {
+    width: 9.5rem;
+    height: 9.5rem;
+  }
+  h1 {
+    font-size: 1.5rem;
+    line-height: 1.25;
+    max-width: 19rem;
+  }
+  .sides {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border-block: 1px solid var(--rule);
+  }
+  .side {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.5rem 0.5rem 1.25rem;
+    color: #d9b25c;
+  }
+  .side + .side {
+    border-left: 1px solid var(--rule);
+  }
+  .side :global(.tile) {
+    width: 100%;
+    height: auto;
+    mix-blend-mode: lighten;
+    -webkit-mask-image: linear-gradient(180deg, #000 78%, transparent 100%);
+    mask-image: linear-gradient(180deg, #000 78%, transparent 100%);
+  }
+  .caption {
+    display: flex;
+    align-items: center;
+    gap: 1.1vw;
+  }
+  .word {
+    font-family: var(--font-logo);
+    font-weight: 500;
+    font-size: 1rem;
+    line-height: 1;
+    letter-spacing: 0.34em;
+    text-transform: uppercase;
+    margin-right: -0.34em;
+  }
+  .line {
+    display: none;
+  }
+
+  /* The seal eases open once when the page loads. */
+  .center :global(.half-c) {
+    animation: seal-open-c 1100ms var(--ease) 250ms both;
+  }
+  .center :global(.half-s) {
+    animation: seal-open-s 1100ms var(--ease) 250ms both;
+  }
+  @keyframes seal-open-c {
+    from {
+      transform: translate(0, 0);
+    }
+    to {
+      transform: translate(-3px, 0);
+    }
+  }
+  @keyframes seal-open-s {
+    from {
+      transform: translate(0, 0);
+    }
+    to {
+      transform: translate(3px, 0);
+    }
+  }
+
+  /* Wide screens: the photograph, sized to its own shape so captions stay beside the objects. */
+  @media (min-width: 860px) {
+    .hero {
+      aspect-ratio: 2400 / 1357;
+      overflow: hidden;
+      background: #0e0403;
+    }
+    .bg {
+      display: block;
+    }
+    .bg img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .scrim {
+      display: block;
+      position: absolute;
+      left: 0;
+      right: 0;
+      pointer-events: none;
+    }
+    .scrim.top {
+      top: 0;
+      height: 18%;
+      background: linear-gradient(180deg, rgba(20, 16, 13, 0.7), rgba(20, 16, 13, 0));
+    }
+    .scrim.bottom {
+      bottom: 0;
+      height: 16%;
+      background: linear-gradient(180deg, rgba(20, 16, 13, 0), var(--ink));
+    }
+    .nav {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 4;
+    }
+    .center {
+      position: absolute;
+      top: 13%;
+      left: 50%;
+      width: 40%;
+      transform: translateX(-50%);
+      z-index: 3;
+      gap: 1.6vw;
+      padding: 0;
+      pointer-events: none;
+    }
+    .center :global(.seal) {
+      width: 17.4vw;
+      height: 17.4vw;
+    }
+    h1 {
+      font-size: clamp(1.25rem, 1.95vw, 2.5rem);
+      max-width: 15em;
+    }
+    .sides {
+      display: block;
+      border: none;
+    }
+    .side {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 50%;
+      z-index: 2;
+      padding: 0;
+      border: none;
+    }
+    .side + .side {
+      border-left: none;
+    }
+    .side.whiskey {
+      left: 0;
+    }
+    .side.fragrance {
+      right: 0;
+    }
+    .side :global(.tile) {
+      display: none;
+    }
+    /* A soft lift on the side being pointed at, and a dimming of the other. */
+    .side::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transition: opacity var(--slow) var(--ease);
+      pointer-events: none;
+    }
+    .side.whiskey::before {
+      background: radial-gradient(ellipse 60% 55% at 36% 62%, rgba(224, 154, 58, 0.16), transparent 70%);
+    }
+    .side.fragrance::before {
+      background: radial-gradient(ellipse 60% 55% at 64% 55%, rgba(214, 140, 126, 0.16), transparent 70%);
+    }
+    .side:hover::before,
+    .side:focus-visible::before {
+      opacity: 1;
+    }
+    .side::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(14, 4, 3, 0.5);
+      opacity: 0;
+      transition: opacity var(--slow) var(--ease);
+      pointer-events: none;
+    }
+    .hero:has(.side.whiskey:hover) .side.fragrance::after,
+    .hero:has(.side.whiskey:focus-visible) .side.fragrance::after,
+    .hero:has(.side.fragrance:hover) .side.whiskey::after,
+    .hero:has(.side.fragrance:focus-visible) .side.whiskey::after {
+      opacity: 1;
+    }
+    .side:focus-visible {
+      outline-offset: -6px;
+    }
+    .caption {
+      position: absolute;
+      top: 63.5%;
+      transition: color var(--slow) var(--ease);
+    }
+    .side.whiskey .caption {
+      left: 57%;
+    }
+    .side.fragrance .caption {
+      right: 57%;
+    }
+    .side:hover .caption,
+    .side:focus-visible .caption {
+      color: #f0cd80;
+    }
+    .word {
+      font-size: clamp(1rem, 1.67vw, 2rem);
+      letter-spacing: 0.42em;
+      margin-right: 0;
+    }
+    .side.fragrance .word {
+      margin-right: -0.42em;
+      padding-right: 0.42em;
+    }
+    .line {
+      display: block;
+      width: 2.8vw;
+      height: 1px;
+      background: var(--gold);
+      opacity: 0.8;
+    }
+
+    /* No photograph: show the line drawings where the objects would be. */
+    .hero.no-image .bg {
+      display: none;
+    }
+    .hero.no-image .fallback {
+      display: block;
+    }
+    .art {
+      position: absolute;
+      bottom: 20%;
+      width: 9vw;
+    }
+    .art :global(svg) {
+      width: 100%;
+      height: auto;
+    }
+    .art.glass {
+      left: 13.5%;
+    }
+    .art.bottle {
+      right: 14%;
+    }
+  }
+</style>

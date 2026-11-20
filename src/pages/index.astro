@@ -1,76 +1,121 @@
 ---
 /**
- * The gateway. This is the interim version: the seal and the two worlds,
- * with the line drawings. The photographic hero and the "latest from both
- * worlds" section replace it in milestone 6.
+ * The gateway: the photographic first screen, then the latest from both
+ * worlds, so the root address carries real content.
  */
 import Base from '../layouts/Base.astro';
-import Seal from '../components/Seal.astro';
-import LineArt from '../components/LineArt.astro';
+import HeroGateway from '../components/HeroGateway.astro';
+import LatestColumn from '../components/LatestColumn.astro';
+import EmailSignup from '../components/EmailSignup.astro';
+import { getSite } from '../lib/site.ts';
+import { listFor } from '../lib/views.ts';
+import { rundownView } from '../lib/rundown-view.ts';
 import { href } from '../lib/href.ts';
+import type { World } from '../lib/validate.ts';
+
+const site = await getSite();
+const column = (world: World) => {
+  const items = listFor(site, world);
+  const viewById = new Map(items.map((i) => [i.id, i.view]));
+  const latest = site.rundownsFor(world)[0];
+  return {
+    world,
+    reviews: items.slice(0, 3),
+    rundown: latest && {
+      id: latest.id,
+      view: rundownView(
+        latest.data,
+        latest.data.items.map((slug) => ({ id: slug, view: viewById.get(slug)! })),
+      ),
+    },
+  };
+};
+const whiskey = column('whiskey');
+const fragrance = column('fragrance');
+const hasSignup = Boolean(import.meta.env.PUBLIC_BUTTONDOWN_USERNAME);
 ---
 
-<Base title="CaskScents" description="Honest reviews of what you pour and what you wear.">
-  <section class="hero wrap">
-    <a class="side" href={href('/whiskey/')}>
-      <span class="word display">Whiskey</span>
-      <LineArt kind="glass" width={110} />
-      <span class="label enter" style="color:#e09a3a">Enter</span>
-    </a>
-    <div class="middle">
-      <Seal size={260} open label="The CaskScents seal" />
-      <h1 class="display">Honest reviews of what you pour and what you wear.</h1>
+<Base
+  title="CaskScents"
+  description="Honest reviews of what you pour and what you wear. Whiskey and fragrance, scored and compared side by side."
+  nav={false}
+>
+  <HeroGateway />
+
+  <section class="wrap latest">
+    <h2 class="display">The latest from both worlds</h2>
+    <div class="columns">
+      <LatestColumn {...whiskey} />
+      <LatestColumn {...fragrance} />
     </div>
-    <a class="side" href={href('/fragrance/')}>
-      <span class="word display">Fragrance</span>
-      <LineArt kind="bottle" width={110} />
-      <span class="label enter" style="color:#c98a7e">Enter</span>
-    </a>
+  </section>
+
+  <section class={`section wrap about ${hasSignup ? 'with-signup' : ''}`}>
+    <div class="statement">
+      <h2 class="display">One person, two obsessions, no sponsors.</h2>
+      <p>
+        Every bottle here was bought, opened and lived with before it was scored. The scale is explained in
+        plain words.
+      </p>
+      <a class="how" href={href('/about/scoring/')}>How I score</a>
+    </div>
+    <EmailSignup />
   </section>
 </Base>
 
 <style>
-  .hero {
+  .latest {
+    padding-block: clamp(2.5rem, 6vw, 4.5rem);
+  }
+  .latest > h2 {
+    font-size: clamp(1.75rem, 1.4rem + 1.6vw, 2.5rem);
+    margin-bottom: clamp(1.5rem, 3vw, 2.5rem);
+  }
+  .columns {
     display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    align-items: center;
-    gap: clamp(1.5rem, 4vw, 4.5rem);
-    padding-block: clamp(2rem, 6vw, 5rem);
+    gap: 3rem;
   }
-  .side {
+  .about {
+    display: grid;
+    gap: 2.5rem;
+    align-items: center;
+  }
+  .statement {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 1rem;
-    text-align: center;
-    color: var(--bone);
+    gap: 0.875rem;
+    align-items: flex-start;
+    max-width: 36rem;
   }
-  .word {
-    font-size: var(--text-4xl);
-  }
-  .middle {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1.75rem;
-    text-align: center;
-    max-width: 26rem;
-  }
-  h1 {
-    font-size: var(--text-2xl);
+  .statement h2 {
+    font-size: clamp(1.5rem, 1.3rem + 0.9vw, 1.875rem);
     line-height: 1.2;
   }
-  @media (max-width: 860px) {
-    .hero {
+  .statement p {
+    color: var(--ash-light);
+    line-height: 1.6;
+  }
+  .how {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: var(--gold);
+  }
+  @media (min-width: 860px) {
+    .columns {
       grid-template-columns: 1fr 1fr;
+      gap: 0;
     }
-    .middle {
-      grid-column: 1 / -1;
-      grid-row: 1;
-      justify-self: center;
+    .columns > :global(.column:first-child) {
+      padding-right: 3rem;
+      border-right: 1px solid var(--rule);
     }
-    .word {
-      font-size: 2.125rem;
+    .columns > :global(.column:last-child) {
+      padding-left: 3rem;
+    }
+    .about.with-signup {
+      grid-template-columns: 1fr 1fr;
+      gap: 6rem;
     }
   }
 </style>

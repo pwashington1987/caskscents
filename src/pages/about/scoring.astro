@@ -1,0 +1,129 @@
+---
+import Base from '../../layouts/Base.astro';
+
+const scale = [
+  { range: '9.5 to 10', word: 'Exceptional', meaning: 'One of the best I have had. I would replace it the day it ran out.' },
+  { range: '8.5 to 9.4', word: 'Excellent', meaning: 'Does almost everything right. Easy to recommend at its price.' },
+  { range: '7.5 to 8.4', word: 'Very good', meaning: 'Glad to own it. One or two things hold it back.' },
+  { range: '6.5 to 7.4', word: 'Good', meaning: 'Enjoyable, with clear reservations. Worth it for the right person or price.' },
+  { range: '5 to 6.4', word: 'Fine', meaning: 'Nothing wrong, nothing memorable. Not worth seeking out.' },
+  { range: 'Below 5', word: 'Not recommended', meaning: 'Flawed, or far too expensive for what it is.' },
+];
+---
+
+<Base title="How I score" description="What the scores on CaskScents mean, and how each bottle earns them.">
+  <article class="wrap page">
+    <p class="label">About</p>
+    <h1 class="display">How I score</h1>
+    <p class="lead">
+      Every bottle gets a score out of 10, to one decimal place. The numbers mean the same thing for a
+      whiskey as for a fragrance.
+    </p>
+
+    <dl class="scale">
+      {
+        scale.map((step) => (
+          <div>
+            <dt>
+              <span class="score">{step.range}</span>
+              <span class="display word">{step.word}</span>
+            </dt>
+            <dd>{step.meaning}</dd>
+          </div>
+        ))
+      }
+    </dl>
+
+    <h2 class="display">What goes into it</h2>
+    <ul class="points">
+      <li>
+        <strong>Whiskey</strong> is scored on nose, palate, finish and value.
+        <strong>Fragrance</strong> is scored on scent, longevity, sillage, bottle and value.
+      </li>
+      <li>Each of those scores comes with a line saying why it earned it.</li>
+      <li>
+        The overall score is my judgment of the whole bottle. It is not an average, so it can sit a little
+        above or below the others.
+      </li>
+      <li>Value is judged against the price I paid, which is shown on every review.</li>
+      <li>Scores are one person's palate and nose. Use them as a starting point, not a verdict.</li>
+    </ul>
+  </article>
+</Base>
+
+<style>
+  .page {
+    max-width: 52rem;
+    padding-block: clamp(1.75rem, 4vw, 3.5rem) var(--section-pad);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  h1 {
+    font-size: var(--text-4xl);
+  }
+  .lead {
+    font-size: var(--text-lg);
+    line-height: 1.6;
+    color: var(--bone-soft);
+  }
+  .scale {
+    margin: 1.5rem 0;
+  }
+  .scale div {
+    display: grid;
+    gap: 0.25rem 2rem;
+    padding-block: 1rem;
+    border-top: 1px solid var(--rule);
+  }
+  dt {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+  }
+  .score {
+    min-width: 6.5rem;
+    font-size: var(--text-sm);
+  }
+  .word {
+    font-size: var(--text-xl);
+  }
+  dd {
+    color: var(--bone-soft);
+    line-height: 1.5;
+  }
+  h2 {
+    font-size: var(--text-h2);
+    margin-top: 1rem;
+  }
+  .points {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    color: var(--bone-soft);
+    line-height: 1.6;
+  }
+  .points li {
+    padding-left: 1.25rem;
+    position: relative;
+  }
+  .points li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.75em;
+    width: 0.5rem;
+    height: 1px;
+    background: var(--gold);
+  }
+  strong {
+    color: var(--bone);
+    font-weight: 600;
+  }
+  @media (min-width: 720px) {
+    .scale div {
+      grid-template-columns: 17rem 1fr;
+      align-items: baseline;
+    }
+  }
+</style>
