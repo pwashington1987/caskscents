@@ -4,9 +4,10 @@
  *
  *   npm run photo lagavulin-16 ~/Pictures/lagavulin.jpg
  *
- * It crops the photo to the site's 2:3 shape, pulls a dark background down to
- * the page color so the bottle blends in, writes a large and a small copy plus
- * a share card, and points the review at the new photo.
+ * It cuts the photo to the site's 2:3 shape with the bottle filling most of
+ * it, pulls a dark background down to the page color so the bottle blends in,
+ * writes a large and a small copy plus a share card, and points the review at
+ * the new photo.
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
@@ -73,6 +74,81 @@ const median = (values) => {
   return sorted[Math.floor(sorted.length / 2)];
 };
 
+/**
+ * The 2:3 window to cut from a photo so the bottle fills most of it, wherever
+ * it stood and however far back the camera was. `box` is where the bottle is.
+ */
+export function frameAround({ width, height, box }) {
+  let frameHeight = Math.max(box.height / 0.8, (box.width / 0.7) * 1.5);
+  let frameWidth = (frameHeight * 2) / 3;
+  if (frameHeight > height) {
+    frameHeight = height;
+    frameWidth = (frameHeight * 2) / 3;
+  }
+  if (frameWidth > width) {
+    frameWidth = width;
+    frameHeight = frameWidth * 1.5;
+  }
+  const clamp = (value, max) => Math.min(Math.max(value, 0), max);
+  const left = clamp(box.left + box.width / 2 - frameWidth / 2, width - frameWidth);
+  const top = clamp(box.top + box.height / 2 - frameHeight / 2, height - frameHeight);
+  return {
+    left: Math.round(left),
+    top: Math.round(top),
+    width: Math.floor(frameWidth),
+    height: Math.floor(frameHeight),
+  };
+}
+
+/** Finds the bottle: everything clearly brighter than the dark backdrop. Returns null when unsure. */
+async function findBottle(image, width, height) {
+  const w = 160;
+  const h = Math.max(1, Math.round((height / width) * w));
+  const data = await image.clone().resize(w, h, { fit: 'fill' }).removeAlpha().raw().toBuffer();
+  const edge = [[], [], []];
+  for (let y = 0; y < h * 0.66; y++) {
+    for (let x = 0; x < w; x++) {
+      if (!(y < 4 || x < 4 || x >= w - 4)) continue;
+      const i = (y * w + x) * 3;
+      for (let c = 0; c < 3; c++) edge[c].push(data[i + c]);
+    }
+  }
+  const bg = edge.map(median);
+  const luma = (r, g, b) => 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  const bgLuma = luma(bg[0], bg[1], bg[2]);
+  if (bgLuma > TOO_BRIGHT) return null;
+
+  const columns = new Array(w).fill(0);
+  const rows = new Array(h).fill(0);
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const i = (y * w + x) * 3;
+      if (luma(data[i], data[i + 1], data[i + 2]) > bgLuma + 28) {
+        columns[x]++;
+        rows[y]++;
+      }
+    }
+  }
+  const span = (counts, least) => {
+    const first = counts.findIndex((n) => n >= least);
+    const last = counts.findLastIndex((n) => n >= least);
+    return first === -1 ? null : [first, last + 1];
+  };
+  const xs = span(columns, Math.max(2, h * 0.02));
+  const ys = span(rows, Math.max(2, w * 0.02));
+  if (!xs || !ys) return null;
+  const scale = width / w;
+  const box = {
+    left: xs[0] * scale,
+    top: ys[0] * (height / h),
+    width: (xs[1] - xs[0]) * scale,
+    height: (ys[1] - ys[0]) * (height / h),
+  };
+  // A "bottle" that is a speck, or the whole picture, means the guess is not to be trusted.
+  const share = (box.width * box.height) / (width * height);
+  return share < 0.01 || share > 0.9 ? null : box;
+}
+
 /** The typical color along the top and upper sides of the photo, where the backdrop is. */
 async function backgroundOf(image) {
   const width = 60;
@@ -105,8 +181,12 @@ export async function processPhoto({ root = process.cwd(), slug, file }) {
   const target = (path) => join(root, 'public', path);
   mkdirSync(dirname(target(out.image)), { recursive: true });
 
-  // Turn it upright, then crop to the site's 2:3 shape around the middle.
-  const cropped = sharp(await sharp(file).rotate().resize(800, 1200, { fit: 'cover' }).removeAlpha().png().toBuffer());
+  // Turn it upright, then cut a 2:3 window around the bottle (or around the middle when it cannot be found).
+  const upright = sharp(await sharp(file).rotate().removeAlpha().png().toBuffer());
+  const size = await upright.metadata();
+  const box = await findBottle(upright, size.width, size.height);
+  const framed = box ? upright.clone().extract(frameAround({ width: size.width, height: size.height, box })) : upright.clone();
+  const cropped = sharp(await framed.resize(800, 1200, { fit: 'cover' }).png().toBuffer());
   const background = await backgroundOf(cropped);
   const brightness = 0.2126 * background.r + 0.7152 * background.g + 0.0722 * background.b;
 

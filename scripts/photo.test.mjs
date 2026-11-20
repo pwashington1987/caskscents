@@ -4,7 +4,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 
 import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { findWorld, levelFor, outputsFor, processPhoto, setImageLine } from './photo.mjs';
+import { findWorld, frameAround, levelFor, outputsFor, processPhoto, setImageLine } from './photo.mjs';
 
 let sharp;
 try {
@@ -60,6 +60,22 @@ test('a dark background is pulled down to the page color and white stays white',
   assert.deepEqual(levelFor(10, 20), { a: 1, b: 0 });
 });
 
+test('the cut is 2:3, centered on the bottle, and the bottle fills about four fifths of it', () => {
+  const frame = frameAround({ width: 3000, height: 4000, box: { left: 1300, top: 1500, width: 400, height: 1200 } });
+  assert.equal(frame.height, 1500);
+  assert.equal(frame.width, 1000);
+  assert.equal(frame.left, 1000);
+  assert.equal(frame.top, 1350);
+});
+
+test('a wide bottle sets the cut by its width, and the cut never leaves the photo', () => {
+  const wide = frameAround({ width: 3000, height: 4000, box: { left: 1000, top: 1500, width: 1400, height: 1200 } });
+  assert.equal(wide.width, 2000);
+  assert.equal(wide.height, 3000);
+  const corner = frameAround({ width: 1500, height: 1200, box: { left: 0, top: 0, width: 300, height: 1100 } });
+  assert.deepEqual(corner, { left: 0, top: 0, width: 800, height: 1200 });
+});
+
 test('writes a 2:3 photo, a small copy and a share card, and updates the review', { skip: !sharp }, async () => {
   const root = project();
   const source = join(root, 'shot.png');
@@ -86,6 +102,11 @@ test('writes a 2:3 photo, a small copy and a share card, and updates the review'
   // The middle is still the bright bottle.
   const mid = await sharp(join(root, 'public/bottles/whiskey/lagavulin-16.webp')).extract({ left: 396, top: 596, width: 8, height: 8 }).raw().toBuffer();
   assert.ok(mid[0] > 200);
+  // The bottle was 800 of 1200 pixels tall in the shot; after the cut it fills about four fifths of the height.
+  const column = await sharp(join(root, 'public/bottles/whiskey/lagavulin-16.webp')).extract({ left: 400, top: 0, width: 1, height: 1200 }).raw().toBuffer();
+  let bright = 0;
+  for (let y = 0; y < 1200; y++) if (column[y * 3] > 150) bright++;
+  assert.ok(bright > 900 && bright < 1020, `bottle is ${bright} pixels tall`);
 
   const review = readFileSync(join(root, 'src/content/whiskeys/lagavulin-16.md'), 'utf8');
   assert.match(review, /^image: \/bottles\/whiskey\/lagavulin-16\.webp$/m);

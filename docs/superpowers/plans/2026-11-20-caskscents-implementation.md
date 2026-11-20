@@ -92,7 +92,7 @@ Done when: the gateway matches the approved board, works with the image blocked,
 
 ## Build notes (changes made while building)
 
-Status on 2026-11-20: M0 to M6 are built and live on the preview address. M7 and M8 remain.
+Status on 2026-11-20: M0 to M7 are built and live on the preview address. M8 remains.
 
 - **Tests** use Node's built-in test runner. The build workspace cannot install packages, so every push is built and checked by GitHub Actions, and pages are reviewed from the published `gh-pages` branch.
 - **Deploy** publishes `dist` to the `gh-pages` branch (Pages set to "Deploy from a branch"). The repository is public.
@@ -105,4 +105,10 @@ Status on 2026-11-20: M0 to M6 are built and live on the preview address. M7 and
 - **Task 23, hero image.** The owner chose to use the wide photograph already approved, with the two portrait images as the phone crops. Nothing was regenerated.
 - **Task 24.** Wide screens lock the hero to the photograph's shape so the captions stay beside the glass and bottle at any width. Phones show the seal, the tagline and the two portrait images side by side, and never download the wide photograph. Keyboard focus rings the caption.
 - **Task 25.** The email signup only appears once `PUBLIC_BUTTONDOWN_USERNAME` is set. A first version of the scoring page (`/about/scoring/`) was added early because the gateway links to it; its wording still needs the owner's approval in M7.
-
+- **Scores and winners (owner's rule, 2026-11-20).** The gateway shows no scores at all. A rundown's winners and scores appear only on the rundown page; lists, feeds, share previews and structured data name the questions it answers, never who won. Review scores do show on the world pages.
+- **Task 26, About.** Left blank at the owner's request. The text lives in `src/content/pages/about.md`; the page and its footer link appear only once that file has text.
+- **Task 27, share cards.** Cards are not drawn at build time (that needs a text-drawing tool the build does not have). Instead there are three fixed cards made from the gateway photograph (`public/og/`), and `npm run photo` writes a card for each bottle with the photo beside the name mark. Cards carry no score.
+- **Task 27, feeds.** Written by hand in `src/lib/feed.ts` with no extra package. Items carry the title, link, date and one-line summary.
+- **Task 29, photo command.** Beyond the plan, it also finds the bottle and frames it, fades the photo's side and bottom edges, writes a small copy for lists and sets the review's `image:` line.
+- **Not done in M7.** A Search Console verification file (needs the owner's code from Google) and a `robots.txt` (only useful once the site is on its own domain).
+- **Samples with photos.** Two samples (`sample-harbour-smoke-16`, `sample-velvet-cherry`) use the owner's generated glass and bottle pictures, to show how real photos sit on the pages.
