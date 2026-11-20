@@ -2,6 +2,7 @@
 /** The bottle's photo, or the line drawing for its world when there is no photo yet. */
 import LineArt from './LineArt.astro';
 import { href } from '../lib/href.ts';
+import { smallPhoto } from '../lib/photos.ts';
 import type { World } from '../lib/validate.ts';
 interface Props {
   world: World;
@@ -12,6 +13,8 @@ interface Props {
   eager?: boolean;
 }
 const { world, name, image, width = 160, eager = false } = Astro.props;
+// Lists load the small copy; large placements and sharp screens get the full one.
+const small = smallPhoto(image);
 ---
 
 {
@@ -19,6 +22,8 @@ const { world, name, image, width = 160, eager = false } = Astro.props;
     <img
       class="bottle-photo"
       src={href(image)}
+      srcset={small ? `${href(small)} 320w, ${href(image)} 800w` : undefined}
+      sizes={small ? `${width}px` : undefined}
       alt={`${name} bottle`}
       width={width}
       height={Math.round(width * 1.5)}

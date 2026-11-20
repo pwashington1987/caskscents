@@ -13,7 +13,8 @@ import { getSite } from '../../../lib/site.ts';
 import { viewOf } from '../../../lib/views.ts';
 import { rundownView } from '../../../lib/rundown-view.ts';
 import { href } from '../../../lib/href.ts';
-import { reviewPath } from '../../../lib/paths.ts';
+import { reviewPath, rundownPath } from '../../../lib/paths.ts';
+import { absoluteUrl, defaultCard, rundownJsonLd } from '../../../lib/meta.ts';
 import type { World } from '../../../lib/validate.ts';
 
 export async function getStaticPaths() {
@@ -34,9 +35,18 @@ const world: World = rundown.data.category;
 const items = rundown.data.items.map((slug) => ({ id: slug, view: viewOf(site.review(world, slug)!) }));
 const view = rundownView(rundown.data, items);
 const { Content } = await render(rundown);
+
+const full = (path: string) => absoluteUrl(Astro.site!, import.meta.env.BASE_URL, path);
+const jsonLd = rundownJsonLd({
+  title: view.title,
+  summary: view.summary,
+  url: full(rundownPath(world, id)),
+  image: full(defaultCard(world)),
+  date: rundown.data.publishDate,
+});
 ---
 
-<Base title={view.title} description={view.summary} world={world}>
+<Base title={view.title} description={view.summary} world={world} article jsonLd={jsonLd}>
   <article>
     <header class="wrap head">
       <p class="muted meta">

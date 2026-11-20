@@ -16,6 +16,8 @@ import { viewOf } from '../../../lib/views.ts';
 import { similarTo } from '../../../lib/similar.ts';
 import { href } from '../../../lib/href.ts';
 import { reviewPath, rundownPath } from '../../../lib/paths.ts';
+import { absoluteUrl, defaultCard, reviewJsonLd } from '../../../lib/meta.ts';
+import { shareCard } from '../../../lib/photos.ts';
 import type { World } from '../../../lib/validate.ts';
 
 export async function getStaticPaths() {
@@ -45,9 +47,22 @@ const similarIds = similarTo(
 );
 const similar = similarIds.map((sid) => others.find((o) => o.id === sid)!);
 const appearsIn = site.rundownsContaining(world, id);
+
+const card = shareCard(view.image) ?? defaultCard(world);
+const full = (path: string) => absoluteUrl(Astro.site!, import.meta.env.BASE_URL, path);
+const jsonLd = reviewJsonLd({
+  name: view.name,
+  brand: view.brand,
+  summary: view.summary,
+  url: full(reviewPath(world, id)),
+  image: full(card),
+  score: entry.data.ratings.overall,
+  date: entry.data.reviewedDate,
+  world,
+});
 ---
 
-<Base title={`${view.name} review`} description={view.summary} world={world}>
+<Base title={`${view.name} review`} description={view.summary} world={world} image={card} article jsonLd={jsonLd}>
   <article>
     <header class="wrap head">
       <p class="meta muted">

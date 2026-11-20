@@ -22,6 +22,11 @@ jobs:
       # samples and hidden from search engines) so pages can be reviewed.
       # Delete this line at launch.
       PUBLIC_SHOW_DRAFTS: 'true'
+      # Optional. Remove the "#" and fill these in to switch them on:
+      # the email signup form (your Buttondown name) and visit counting
+      # (your Cloudflare Web Analytics token).
+      # PUBLIC_BUTTONDOWN_USERNAME: 'your-buttondown-name'
+      # PUBLIC_CF_ANALYTICS_TOKEN: 'your-cloudflare-token'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

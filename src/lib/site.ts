@@ -3,7 +3,8 @@
  * should be hidden, sorts everything newest first, and runs the checks that
  * span several files, stopping the build if any of them fail.
  */
-import { getCollection, type CollectionEntry } from 'astro:content';
+import { getCollection, getEntry, type CollectionEntry } from 'astro:content';
+import { hasText } from './meta.ts';
 import {
   draftConflicts,
   formatIssues,
@@ -22,6 +23,12 @@ export type Review = Whiskey | Fragrance;
 /** Drafts show while developing, and on a preview deploy that asks for them. */
 export const showDrafts: boolean =
   import.meta.env.DEV || import.meta.env.PUBLIC_SHOW_DRAFTS === 'true';
+
+/** The About page, once it has text. Until then there is no page and no link to it. */
+export async function aboutPage(): Promise<CollectionEntry<'pages'> | undefined> {
+  const entry = await getEntry('pages', 'about');
+  return entry && hasText(entry.body) ? entry : undefined;
+}
 
 export type Site = {
   whiskeys: Whiskey[];

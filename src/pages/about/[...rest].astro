@@ -1,0 +1,66 @@
+---
+/**
+ * The About page. Its text lives in src/content/pages/about.md. While that
+ * file is blank this page is not built, and the footer leaves the link out.
+ */
+import { render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { aboutPage } from '../../lib/site.ts';
+
+export async function getStaticPaths() {
+  const about = await aboutPage();
+  return about ? [{ params: { rest: undefined } }] : [];
+}
+
+const about = (await aboutPage())!;
+const { Content } = await render(about);
+---
+
+<Base title={about.data.title} description={about.data.description ?? 'About CaskScents.'}>
+  <article class="wrap page">
+    <p class="label">CaskScents</p>
+    <h1 class="display">{about.data.title}</h1>
+    <div class="text">
+      <Content />
+    </div>
+  </article>
+</Base>
+
+<style>
+  .page {
+    max-width: 46rem;
+    padding-block: clamp(1.75rem, 4vw, 3.5rem) var(--section-pad);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  h1 {
+    font-size: var(--text-4xl);
+  }
+  .text {
+    font-size: var(--text-lg);
+    line-height: 1.7;
+    color: var(--bone-soft);
+  }
+  .text :global(p + p) {
+    margin-top: 1.25em;
+  }
+  .text :global(h2) {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: var(--text-h2);
+    color: var(--bone);
+    margin: 2em 0 0.5em;
+  }
+  .text :global(a) {
+    color: var(--gold);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+  .text :global(img) {
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+    margin-block: 1.5em;
+  }
+</style>

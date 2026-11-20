@@ -139,4 +139,13 @@ const rundowns = defineCollection({
   }),
 });
 
-export const collections = { whiskeys, fragrances, rundowns };
+/** Plain pages written in Markdown, such as About. */
+const pages = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/pages' }),
+  schema: z.object({
+    title: z.string().min(1),
+    description: z.string().max(160, 'Keep the description to one line (160 characters).').optional(),
+  }),
+});
+
+export const collections = { whiskeys, fragrances, rundowns, pages };

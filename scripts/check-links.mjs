@@ -42,6 +42,18 @@ for (const page of pages) {
   }
 }
 
+// The share picture is a full address, so it is checked separately.
+for (const page of pages) {
+  const html = readFileSync(page, 'utf8');
+  const match = html.match(/<meta property="og:image" content="https?:\/\/[^/"]+([^"]*)"/);
+  if (!match) continue;
+  checked++;
+  const relative = decodeURIComponent(match[1].slice(base.length));
+  if (!match[1].startsWith(`${base}/`) || !existsSync(join(dist, relative))) {
+    broken.push(`${page}: the share picture "${match[1]}" does not exist`);
+  }
+}
+
 if (broken.length) {
   console.error(`Broken links (${broken.length}):\n  ${broken.join('\n  ')}`);
   process.exit(1);

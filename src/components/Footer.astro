@@ -1,11 +1,14 @@
 ---
 /** The closing line on every page. The whiskey world adds a drinking note. */
 import { href } from '../lib/href.ts';
+import { feedPath } from '../lib/paths.ts';
+import { aboutPage } from '../lib/site.ts';
 import type { World } from '../lib/validate.ts';
 interface Props {
   world: World | null;
 }
 const { world } = Astro.props;
+const about = await aboutPage();
 const sense = world === 'fragrance' ? 'nose' : world === 'whiskey' ? 'palate' : 'palate and nose';
 ---
 
@@ -16,7 +19,9 @@ const sense = world === 'fragrance' ? 'nose' : world === 'whiskey' ? 'palate' : 
     {world !== 'fragrance' && ' Please drink responsibly.'}
   </p>
   <nav aria-label="About">
+    {about && <a href={href('/about/')}>About</a>}
     <a href={href('/about/scoring/')}>How I score</a>
+    {world && <a href={href(feedPath(world))}>RSS</a>}
   </nav>
 </footer>
 
@@ -31,6 +36,10 @@ const sense = world === 'fragrance' ? 'nose' : world === 'whiskey' ? 'palate' : 
     border-top: 1px solid var(--rule);
     color: var(--ash);
     font-size: var(--text-xs);
+  }
+  nav {
+    display: flex;
+    gap: 1.5rem;
   }
   nav a {
     display: inline-flex;

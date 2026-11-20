@@ -14,6 +14,9 @@ import '../styles/base.css';
 import SiteNav from '../components/SiteNav.astro';
 import Footer from '../components/Footer.astro';
 import { showDrafts } from '../lib/site.ts';
+import { href } from '../lib/href.ts';
+import { absoluteUrl, defaultCard, jsonLdText, SITE_NAME } from '../lib/meta.ts';
+import { feedPath } from '../lib/paths.ts';
 import type { World } from '../lib/validate.ts';
 
 interface Props {
@@ -22,10 +25,21 @@ interface Props {
   world?: World | null;
   /** Set false on pages that draw their own top bar, such as the gateway. */
   nav?: boolean;
+  /** The picture shown when the page is shared. Defaults to the card for its world. */
+  image?: string;
+  /** True for reviews and rundowns. */
+  article?: boolean;
+  /** A structured description of the page for search engines. */
+  jsonLd?: unknown;
 }
-const { title, description, world = null, nav = true } = Astro.props;
+const { title, description, world = null, nav = true, image, article = false, jsonLd } = Astro.props;
 const fullTitle = title === 'CaskScents' ? title : `${title} · CaskScents`;
 const previewing = showDrafts && import.meta.env.PROD;
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const shareImage = absoluteUrl(Astro.site!, import.meta.env.BASE_URL, image ?? defaultCard(world));
+const feeds: World[] = world ? [world] : ['whiskey', 'fragrance'];
+// Visits are only counted on the real site, and only once a token is set.
+const analytics = import.meta.env.PROD && !previewing ? import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN : undefined;
 ---
 
 <!doctype html>
@@ -37,6 +51,40 @@ const previewing = showDrafts && import.meta.env.PROD;
     <meta name="description" content={description} />
     <meta name="theme-color" content="#14100d" />
     {previewing && <meta name="robots" content="noindex, nofollow" />}
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/png" sizes="48x48" href={href('/favicon-48.png')} />
+    <link rel="icon" type="image/png" sizes="192x192" href={href('/favicon-192.png')} />
+    <link rel="apple-touch-icon" href={href('/apple-touch-icon.png')} />
+    {
+      feeds.map((feed) => (
+        <link
+          rel="alternate"
+          type="application/rss+xml"
+          title={`CaskScents ${feed === 'whiskey' ? 'Whiskey' : 'Fragrance'}`}
+          href={href(feedPath(feed))}
+        />
+      ))
+    }
+    <meta property="og:site_name" content={SITE_NAME} />
+    <meta property="og:type" content={article ? 'article' : 'website'} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={shareImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    {jsonLd ? <script type="application/ld+json" is:inline set:html={jsonLdText(jsonLd)} /> : null}
+    {
+      analytics && (
+        <script
+          is:inline
+          defer
+          src="https://static.cloudflareinsights.com/beacon.min.js"
+          data-cf-beacon={JSON.stringify({ token: analytics })}
+        />
+      )
+    }
   </head>
   <body>
     {
