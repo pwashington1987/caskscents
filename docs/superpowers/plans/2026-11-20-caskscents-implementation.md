@@ -21,7 +21,7 @@ Build the site described in the spec as a static Astro project, deployed from Gi
 1. Initial commit: spec, this plan, `.gitignore`, README with the authoring commands.
 2. Scaffold Astro with TypeScript strict, unit tests, `astro check`.
 3. `src/lib/href.ts` base-path helper with tests; `astro.config.mjs` with `site` and `base`.
-4. GitHub Actions workflow: install, test, `astro check`, build, link check, deploy to Pages.
+4. GitHub Actions workflow: install, test, `astro check`, build, link check, publish the built site to the `gh-pages` branch.
 Done when: an empty styled page is live at the Pages URL and CI is green.
 
 ### M1. Design foundation
@@ -79,7 +79,7 @@ Done when: the gateway matches the approved board, works with the image blocked,
 | When | What |
 |---|---|
 | Before M0 | Link GitHub to Claude so the repository can be reached. |
-| M0 | In the repository's Pages settings, set the source to "GitHub Actions" (one click). |
+| M0 | In the repository's Pages settings, choose "Deploy from a branch", then `gh-pages` and `/ (root)`. Pages on a private repository needs a paid GitHub plan; a public repository is free. |
 | M6 | Approve the final hero image. |
 | M7 | About-page text; a Cloudflare Web Analytics token and a Buttondown username (both optional at launch). |
 | After handover | Real reviews and bottle photos. The site launches with no published reviews until these exist. |

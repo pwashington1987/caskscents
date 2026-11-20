@@ -50,7 +50,7 @@ Until launch, the automatic deploy sets `PUBLIC_SHOW_DRAFTS=true` so the samples
 
 ## Publishing
 
-Every push to `main` runs the tests, builds the site and deploys it with GitHub Actions (`.github/workflows/deploy.yml`).
+Every push to `main` runs the tests, builds the site and publishes the result to the `gh-pages` branch (`.github/workflows/deploy.yml`). GitHub Pages serves that branch: in the repository's Settings, under Pages, choose "Deploy from a branch", then `gh-pages` and `/ (root)`.
 
 ## Moving to your own domain
 
