@@ -42,6 +42,29 @@ jobs:
         run: npm run build
       - name: Link check
         run: npm run links
+      # The site exactly as it will launch: drafts and samples hidden. This
+      # catches anything that only breaks once the samples are gone.
+      - name: Check the launch build (no drafts)
+        env:
+          PUBLIC_SHOW_DRAFTS: 'false'
+          BASE_PATH: /caskscents/launch-preview
+        run: |
+          npx astro build --outDir dist-launch
+          node scripts/check-links.mjs dist-launch
+          mv dist-launch dist/launch-preview
+      # Pins the exact package versions the first time, so later builds
+      # cannot change under you. Does nothing once package-lock.json exists.
+      - name: Save the package versions if they are not saved yet
+        if: github.ref == 'refs/heads/main'
+        continue-on-error: true
+        run: |
+          if ! git ls-files --error-unmatch package-lock.json >/dev/null 2>&1; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add package-lock.json
+            git commit -q -m "Pin package versions (package-lock.json)"
+            git push -q origin HEAD:main
+          fi
       - name: Publish the built site to the gh-pages branch
         if: github.ref == 'refs/heads/main'
         run: |

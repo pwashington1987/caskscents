@@ -143,3 +143,25 @@ select {
     scroll-behavior: auto !important;
   }
 }
+
+/* The first stop for keyboard users: jumps past the top bar. Hidden until focused. */
+.skip {
+  position: absolute;
+  left: 0.75rem;
+  top: -4rem;
+  z-index: 100;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 1rem;
+  background: var(--gold);
+  color: var(--ink);
+  border-radius: 4px;
+  font-weight: 600;
+}
+.skip:focus {
+  top: 0.75rem;
+}
+main:focus {
+  outline: none;
+}

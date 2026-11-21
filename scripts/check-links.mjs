@@ -6,11 +6,12 @@
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
-const dist = 'dist';
+// The folder to check: dist/ unless another is named, as in: node scripts/check-links.mjs dist-launch
+const dist = process.argv[2] ?? 'dist';
 const base = (process.env.BASE_PATH ?? '/caskscents').replace(/\/$/, '');
 
 if (!existsSync(dist)) {
-  console.error('There is no dist/ folder. Run "npm run build" first.');
+  console.error(`There is no ${dist}/ folder. Run "npm run build" first.`);
   process.exit(1);
 }
 

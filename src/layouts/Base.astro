@@ -87,6 +87,7 @@ const analytics = import.meta.env.PROD && !previewing ? import.meta.env.PUBLIC_C
     }
   </head>
   <body>
+    <a class="skip" href="#main">Skip to the content</a>
     {
       previewing && (
         <p class="sample-banner">
@@ -95,7 +96,7 @@ const analytics = import.meta.env.PROD && !previewing ? import.meta.env.PUBLIC_C
       )
     }
     {nav && <SiteNav world={world} />}
-    <main>
+    <main id="main" tabindex="-1">
       <slot />
     </main>
     <Footer world={world} />
