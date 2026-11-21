@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>CaskScents Whiskey</title>
+    <link>https://pwashington1987.github.io/caskscents/whiskey/</link>
+    <description>New whiskey reviews and rundowns from CaskScents.</description>
+    <language>en</language>
+    <atom:link href="https://pwashington1987.github.io/caskscents/whiskey/rss.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Sample: Three for a Cold Night</title>
+      <link>https://pwashington1987.github.io/caskscents/whiskey/rundowns/sample-three-for-a-cold-night/</link>
+      <guid isPermaLink="true">https://pwashington1987.github.io/caskscents/whiskey/rundowns/sample-three-for-a-cold-night/</guid>
+      <pubDate>Thu, 19 Nov 2026 00:00:00 GMT</pubDate>
+      <category>Rundown</category>
+      <description>Sample rundown for development. Two Islay malts and a bourbon, poured side by side.</description>
+    </item>
+    <item>
+      <title>Sample: Harbour Smoke 16 review</title>
+      <link>https://pwashington1987.github.io/caskscents/whiskey/reviews/sample-harbour-smoke-16/</link>
+      <guid isPermaLink="true">https://pwashington1987.github.io/caskscents/whiskey/reviews/sample-harbour-smoke-16/</guid>
+      <pubDate>Wed, 18 Nov 2026 00:00:00 GMT</pubDate>
+      <category>Review</category>
+      <description>Sample entry for development. A smoky, sherried Islay malt with a very long finish.</description>
+    </item>
+    <item>
+      <title>Sample: Shoreline 10 review</title>
+      <link>https://pwashington1987.github.io/caskscents/whiskey/reviews/sample-shoreline-10/</link>
+      <guid isPermaLink="true">https://pwashington1987.github.io/caskscents/whiskey/reviews/sample-shoreline-10/</guid>
+      <pubDate>Thu, 12 Nov 2026 00:00:00 GMT</pubDate>
+      <category>Review</category>
+      <description>Sample entry for development. Loud, medicinal smoke at a weeknight price.</description>
+    </item>
+    <item>
+      <title>Sample: Two Islays, Head to Head</title>
+      <link>https://pwashington1987.github.io/caskscents/whiskey/rundowns/sample-two-islays/</link>
+      <guid isPermaLink="true">https://pwashington1987.github.io/caskscents/whiskey/rundowns/sample-two-islays/</guid>
+      <pubDate>Sun, 08 Nov 2026 00:00:00 GMT</pubDate>
+      <category>Rundown</category>
+      <description>Sample rundown for development. A two-bottle comparison with one reworded note.</description>
+    </item>
+    <item>
+      <title>Sample: Rickhouse Reserve review</title>
+      <link>https://pwashington1987.github.io/caskscents/whiskey/reviews/sample-rickhouse-reserve/</link>
+      <guid isPermaLink="true">https://pwashington1987.github.io/caskscents/whiskey/reviews/sample-rickhouse-reserve/</guid>
+      <pubDate>Thu, 05 Nov 2026 00:00:00 GMT</pubDate>
+      <category>Review</category>
+      <description>Sample entry for development. A bottled-in-bond bourbon that punches above its price.</description>
+    </item>
+  </channel>
+</rss>

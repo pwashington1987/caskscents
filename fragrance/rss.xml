@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>CaskScents Fragrance</title>
+    <link>https://pwashington1987.github.io/caskscents/fragrance/</link>
+    <description>New fragrance reviews and rundowns from CaskScents.</description>
+    <language>en</language>
+    <atom:link href="https://pwashington1987.github.io/caskscents/fragrance/rss.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Sample: Velvet Cherry review</title>
+      <link>https://pwashington1987.github.io/caskscents/fragrance/reviews/sample-velvet-cherry/</link>
+      <guid isPermaLink="true">https://pwashington1987.github.io/caskscents/fragrance/reviews/sample-velvet-cherry/</guid>
+      <pubDate>Tue, 17 Nov 2026 00:00:00 GMT</pubDate>
+      <category>Review</category>
+      <description>Sample entry for development. Cherry and vanilla with the lights turned down.</description>
+    </item>
+    <item>
+      <title>Sample: Three Ways to Smell Expensive</title>
+      <link>https://pwashington1987.github.io/caskscents/fragrance/rundowns/sample-three-ways-to-smell-expensive/</link>
+      <guid isPermaLink="true">https://pwashington1987.github.io/caskscents/fragrance/rundowns/sample-three-ways-to-smell-expensive/</guid>
+      <pubDate>Mon, 16 Nov 2026 00:00:00 GMT</pubDate>
+      <category>Rundown</category>
+      <description>Sample rundown for development. A gourmand, an iris and a citrus, worn in the same week.</description>
+    </item>
+    <item>
+      <title>Sample: Midnight Orchard Reserve Extrait de Parfum Limited Edition review</title>
+      <link>https://pwashington1987.github.io/caskscents/fragrance/reviews/sample-long-name-extrait/</link>
+      <guid isPermaLink="true">https://pwashington1987.github.io/caskscents/fragrance/reviews/sample-long-name-extrait/</guid>
+      <pubDate>Thu, 12 Nov 2026 00:00:00 GMT</pubDate>
+      <category>Review</category>
+      <description>Sample entry for development. A long name, a high price and a dark plum that lasts into the next day.</description>
+    </item>
+    <item>
+      <title>Sample: Grey Suede review</title>
+      <link>https://pwashington1987.github.io/caskscents/fragrance/reviews/sample-grey-suede/</link>
+      <guid isPermaLink="true">https://pwashington1987.github.io/caskscents/fragrance/reviews/sample-grey-suede/</guid>
+      <pubDate>Tue, 10 Nov 2026 00:00:00 GMT</pubDate>
+      <category>Review</category>
+      <description>Sample entry for development. Soft iris and suede over warm woods.</description>
+    </item>
+    <item>
+      <title>Sample: Four Bottles, One Long Name, and a Table That Has to Hold Them All</title>
+      <link>https://pwashington1987.github.io/caskscents/fragrance/rundowns/sample-four-bottle-stress-test/</link>
+      <guid isPermaLink="true">https://pwashington1987.github.io/caskscents/fragrance/rundowns/sample-four-bottle-stress-test/</guid>
+      <pubDate>Tue, 10 Nov 2026 00:00:00 GMT</pubDate>
+      <category>Rundown</category>
+      <description>Sample rundown for development. The most a rundown can hold: four bottles and four picks.</description>
+    </item>
+    <item>
+      <title>Sample: Citrus Club review</title>
+      <link>https://pwashington1987.github.io/caskscents/fragrance/reviews/sample-citrus-club/</link>
+      <guid isPermaLink="true">https://pwashington1987.github.io/caskscents/fragrance/reviews/sample-citrus-club/</guid>
+      <pubDate>Mon, 02 Nov 2026 00:00:00 GMT</pubDate>
+      <category>Review</category>
+      <description>Sample entry for development. A bright citrus opener that does not last the afternoon.</description>
+    </item>
+  </channel>
+</rss>
