@@ -92,7 +92,7 @@ Done when: the gateway matches the approved board, works with the image blocked,
 
 ## Build notes (changes made while building)
 
-Status on 2026-11-20: M0 to M7 are built and live on the preview address. M8 remains.
+Status on 2026-11-20: M0 to M8 are built and live on the preview address. What remains is the owner's walkthrough and the launch checklist in the README.
 
 - **Tests** use Node's built-in test runner. The build workspace cannot install packages, so every push is built and checked by GitHub Actions, and pages are reviewed from the published `gh-pages` branch.
 - **Deploy** publishes `dist` to the `gh-pages` branch (Pages set to "Deploy from a branch"). The repository is public.
@@ -112,3 +112,8 @@ Status on 2026-11-20: M0 to M7 are built and live on the preview address. M8 rem
 - **Task 29, photo command.** Beyond the plan, it also finds the bottle and frames it, fades the photo's side and bottom edges, writes a small copy for lists and sets the review's `image:` line.
 - **Not done in M7.** A Search Console verification file (needs the owner's code from Google) and a `robots.txt` (only useful once the site is on its own domain).
 - **Samples with photos.** Two samples (`sample-harbour-smoke-16`, `sample-velvet-cherry`) use the owner's generated glass and bottle pictures, to show how real photos sit on the pages.
+- **Task 30, quality pass.** Every built page was checked at 390 and 1440 px (and the main ones at 768 and 1024) for sideways scroll, console errors, broken images, heading order, labels, tap-target size and text contrast; keyboard order and focus were checked on the gateway, shelf, review and rundown pages. Fixed: a skip link, three small tap targets, and the rundown line-up when photos and line drawings are mixed. Lighthouse could not be run from the build workspace, so speed was measured on a simulated slow phone instead (gateway: largest paint about 1.2 s, no blocking, no layout shift, about 255 KB in 12 requests). Run PageSpeed Insights on the live address for the official score.
+- **Launch build.** The workflow builds the site a second time with drafts hidden and checks its links, so the empty-at-launch site is tested on every push. Its empty states were reviewed once.
+- **Package versions** are pinned: the workflow saved `package-lock.json` on its first run.
+- **Stress samples.** `sample-long-name-extrait` and `sample-four-bottle-stress-test` check a very long name and the four-bottle rundown.
+

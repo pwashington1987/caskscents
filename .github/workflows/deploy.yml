@@ -22,6 +22,10 @@ jobs:
       # samples and hidden from search engines) so pages can be reviewed.
       # Delete this line at launch.
       PUBLIC_SHOW_DRAFTS: 'true'
+      # When the site moves to its own domain, remove the "#" from these two
+      # lines and put your domain in the first (see the README).
+      # SITE_URL: 'https://caskscents.com'
+      # BASE_PATH: '/'
       # Optional. Remove the "#" and fill these in to switch them on:
       # the email signup form (your Buttondown name) and visit counting
       # (your Cloudflare Web Analytics token).
@@ -47,11 +51,9 @@ jobs:
       - name: Check the launch build (no drafts)
         env:
           PUBLIC_SHOW_DRAFTS: 'false'
-          BASE_PATH: /caskscents/launch-preview
         run: |
           npx astro build --outDir dist-launch
           node scripts/check-links.mjs dist-launch
-          mv dist-launch dist/launch-preview
       # Pins the exact package versions the first time, so later builds
       # cannot change under you. Does nothing once package-lock.json exists.
       - name: Save the package versions if they are not saved yet
