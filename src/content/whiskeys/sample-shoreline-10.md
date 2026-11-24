@@ -9,13 +9,14 @@ type: Single malt
 age: 10
 abv: 43
 price: 55
+source: sample
 summary: "Sample entry for development. Loud, medicinal smoke at a weeknight price."
-ratings: { nose: 8.4, palate: 8.0, finish: 8.6, value: 8.6, overall: 8.2 }
+value: "Cheapest here and the most distinctive. Hard to argue with at this price."
+ratings: { nose: 8.4, palate: 8.0, finish: 8.6, overall: 8.2 }
 ratingNotes:
   nose: "Iodine and bonfire, loud and medicinal. Unmistakable, not subtle."
   palate: "Thinner than the others. The smoke carries it, but there is less underneath."
   finish: "Long and ashy. Stays medicinal to the end."
-  value: "Cheapest here and the most distinctive. Hard to argue with at this price."
 flavorProfile:
   - { label: Peat and smoke, intensity: 98 }
   - { label: Brine and medicinal, intensity: 95 }

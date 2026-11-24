@@ -9,13 +9,13 @@ audience: Unisex
 price: 195
 volumeMl: 100
 summary: "Sample entry for development. Soft iris and suede over warm woods."
-ratings: { scent: 9.0, longevity: 8.4, sillage: 7.6, bottle: 9.0, value: 7.8, overall: 8.6 }
+value: "A lot of money, but it replaces three office scents."
+ratings: { scent: 9.0, longevity: 8.4, sillage: 7.6, bottle: 9.0, overall: 8.6 }
 ratingNotes:
   scent: "Cool iris up top, warm sandalwood underneath. Quietly expensive."
   longevity: "Easily a full working day, longer on clothes."
   sillage: "Stays within arm's length, which is the point."
   bottle: "Same heavy flacon as its sibling. Feels the price."
-  value: "A lot of money, but it replaces three office scents."
 accords:
   - { label: Iris, weight: 100 }
   - { label: Woody, weight: 88 }

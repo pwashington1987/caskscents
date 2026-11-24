@@ -10,12 +10,12 @@ age: null
 abv: 50
 price: 38
 summary: "Sample entry for development. A bottled-in-bond bourbon that punches above its price."
-ratings: { nose: 8.0, palate: 8.3, finish: 7.8, value: 9.2, overall: 8.3 }
+value: "Under forty dollars for this much flavor is the whole argument."
+ratings: { nose: 8.0, palate: 8.3, finish: 7.8, overall: 8.3 }
 ratingNotes:
   nose: "Caramel, cherry and toasted oak. Simple and inviting."
   palate: "Sweet up front, then a peppery kick from the proof."
   finish: "Medium length. Oak and brown sugar, a little heat."
-  value: "Under forty dollars for this much flavor is the whole argument."
 flavorProfile:
   - { label: Caramel and toffee, intensity: 80 }
   - { label: Vanilla and oak, intensity: 75 }

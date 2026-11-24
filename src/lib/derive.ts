@@ -53,9 +53,12 @@ export function roundScore(n: number): number {
   return Math.round((n + Number.EPSILON) * 10) / 10;
 }
 
-export function subscoreMean(ratings: Record<string, number>): number {
-  const subs = Object.entries(ratings).filter(([k]) => k !== 'overall');
-  return subs.reduce((sum, [, v]) => sum + v, 0) / subs.length;
+export function subscoreMean(ratings: Record<string, number | undefined>): number {
+  const subs = Object.entries(ratings)
+    .filter(([k]) => k !== 'overall')
+    .map(([, v]) => v)
+    .filter((v): v is number => v !== undefined);
+  return subs.reduce((sum, v) => sum + v, 0) / subs.length;
 }
 
 export function longevityLabel([min, max]: [number, number] | number[]): string {

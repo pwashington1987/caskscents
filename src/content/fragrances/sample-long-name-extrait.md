@@ -7,15 +7,15 @@ year: 2024
 concentration: Extrait de Parfum
 audience: Unisex
 price: 340
+source: sample
 volumeMl: 70
 summary: "Sample entry for development. A long name, a high price and a dark plum that lasts into the next day."
-ratings: { scent: 9.0, longevity: 9.5, sillage: 8.0, bottle: 8.5, value: 6.0, overall: 8.5 }
+value: "The most expensive one here by a wide margin, which is why I tried a sample first. Worth a full bottle only if you already know you love it."
+ratings: { scent: 9.0, longevity: 9.5, sillage: 8.0, overall: 8.5 }
 ratingNotes:
   scent: "Stewed plum, incense and a dry woody base. Rich without turning syrupy, and it changes for hours."
   longevity: "Twelve hours on skin and still there on a scarf two days later. One spray is enough."
   sillage: "Strong for the first three hours, then it settles to a steady arm's length for the rest of the day."
-  bottle: "Thick glass and a weighted cap. The sprayer is fine but the label scratches easily."
-  value: "The most expensive bottle here by a wide margin. Worth it only if you already know you love it."
 accords:
   - { label: Fruity, weight: 100 }
   - { label: Amber, weight: 88 }

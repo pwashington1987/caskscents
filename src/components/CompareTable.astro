@@ -49,6 +49,21 @@ const { view } = Astro.props;
           </tr>
         ))
       }
+      {
+        view.value && (
+          <tr class="words">
+            <th scope="row">
+              Value
+              <span class="aside">Not scored</span>
+            </th>
+            {view.value.map((cell) => (
+              <td>
+                <span class="note">{cell.note || '–'}</span>
+              </td>
+            ))}
+          </tr>
+        )
+      }
       <tr class="overall">
         <th scope="row">Overall</th>
         {
@@ -120,6 +135,15 @@ const { view } = Astro.props;
     font-size: var(--text-xs);
     line-height: 1.45;
     color: var(--ash-light);
+  }
+  .words .note {
+    margin-top: 0;
+  }
+  .aside {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: var(--text-xs);
+    color: var(--ash);
   }
   .fact td {
     font-family: var(--font-mono);

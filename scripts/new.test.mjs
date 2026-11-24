@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { create, slugify } from './new.mjs';
+import { create, slugify, templates } from './new.mjs';
 
 const root = () => mkdtempSync(join(tmpdir(), 'caskscents-new-'));
 
@@ -44,4 +44,14 @@ test('refuses to overwrite an existing file', () => {
 test('explains an unknown kind or a missing name', () => {
   assert.throws(() => create({ kind: 'gin', name: 'x', root: root() }), /whiskey, fragrance or rundown/);
   assert.throws(() => create({ kind: 'whiskey', name: '', root: root() }), /Give it a name/);
+});
+
+test('new reviews have no value score: value is a line of words, and a sample can be marked', () => {
+  for (const kind of ['whiskey', 'fragrance']) {
+    const text = templates[kind]('Some Bottle', '2026-11-24');
+    assert.equal(/^ratings: \{[^}]*value/m.test(text), false);
+    assert.equal(/^  value:/m.test(text), false);
+    assert.match(text, /^value: "/m);
+    assert.match(text, /^# source: sample/m);
+  }
 });

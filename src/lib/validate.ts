@@ -13,7 +13,7 @@ export type ReviewLite = {
   id: string;
   world: World;
   name: string;
-  ratings: Record<string, number>;
+  ratings: { overall: number } & Record<string, number | undefined>;
 };
 
 export type RundownLite = {
@@ -25,9 +25,11 @@ export type RundownLite = {
 };
 
 const ATTRIBUTES: Record<World, string[]> = {
-  whiskey: ['nose', 'palate', 'finish', 'value'],
-  fragrance: ['scent', 'longevity', 'sillage', 'bottle', 'value'],
+  whiskey: ['nose', 'palate', 'finish'],
+  fragrance: ['scent', 'longevity', 'sillage', 'bottle'],
 };
+/** Notes a rundown may reword: one per score, plus the value note (which is words only). */
+const notesFor = (world: World) => [...ATTRIBUTES[world], 'value'];
 
 export function attributesFor(world: World): string[] {
   return ATTRIBUTES[world];
@@ -91,7 +93,7 @@ export function validateRundown(
     }
   }
 
-  const attributes = ATTRIBUTES[rundown.category];
+  const attributes = notesFor(rundown.category);
   for (const [slug, notes] of Object.entries(rundown.noteOverrides ?? {})) {
     if (!seen.has(slug)) {
       error(`noteOverrides has an entry for "${slug}", which is not one of this rundown's items.`);
@@ -100,7 +102,7 @@ export function validateRundown(
     for (const attribute of Object.keys(notes)) {
       if (!attributes.includes(attribute)) {
         error(
-          `noteOverrides for "${slug}" uses "${attribute}". Valid attributes are: ${attributes.join(', ')}.`,
+          `noteOverrides for "${slug}" uses "${attribute}". Valid names are: ${attributes.join(', ')}.`,
         );
       }
     }

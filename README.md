@@ -42,6 +42,8 @@ npm run new fragrance "Rouge Smoking"
 This creates a file in `src/content/whiskeys/` or `src/content/fragrances/` with every field in place. Fill in the blanks, then write the review underneath.
 
 - **Scores** run from 0 to 10 with one decimal. Each score has a one or two line note saying why (160 characters at most).
+- **Value is words, not a score.** Whiskey is scored on nose, palate and finish; fragrance on scent, longevity, sillage and the bottle. Price never changes a score. Say whether a bottle is worth the money on the `value:` line, in a sentence or two. It appears beside the scores, marked as not scored.
+- **Samples.** If you reviewed it from a sample, add the line `source: sample`. The review then says "From a sample". For a fragrance, leave out the two `bottle` entries (the score and its note), since there was no bottle to judge. `price` is always the price of a full bottle.
 - **Fixed word lists.** Regions, types, flavors, accords, notes and tags must come from the lists in `src/data/`. If you misspell one, the build stops and suggests the closest valid spelling. To use a new word, add a line to the list.
 - **Short name.** A long bottle name can have a `shortName` (16 characters at most). It labels the narrow columns in rundown tables.
 - **Drafts.** A new file starts with `draft: true`. Drafts show while you run `npm run dev` and are never published. Delete that line when the review is ready.
@@ -121,7 +123,7 @@ Every internal link is built through one helper (`src/lib/href.ts`), so nothing 
 ## Launch checklist
 
 1. Write your first real reviews, with photos.
-2. Read the "How I score" page and the line on the gateway that begins "Every bottle here was bought", and correct anything that is not true for you.
+2. Read the "How I score" page and the line on the gateway that begins "Everything here was poured or worn", and correct anything that is not true for you.
 3. Add your About text (optional: the site works without it).
 4. Delete the `sample-` files from `src/content/` and their photos from `public/bottles/`.
 5. In `.github/workflows/deploy.yml`, delete the line `PUBLIC_SHOW_DRAFTS: 'true'`. The preview banner goes, drafts are hidden, and search engines are allowed in.

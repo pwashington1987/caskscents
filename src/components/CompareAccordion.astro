@@ -37,6 +37,31 @@ const { view } = Astro.props;
       </details>
     ))
   }
+  {
+    view.value && (
+      <details>
+        <summary>
+          <span class="text">
+            <span class="name">Value</span>
+            <span class="top muted">In words. Not part of the score.</span>
+          </span>
+          <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+          </svg>
+        </summary>
+        <ul>
+          {view.value.map((cell) => (
+            <li>
+              <span class="row">
+                <span class="display bottle">{cell.name}</span>
+              </span>
+              <span class="note">{cell.note || 'Not covered in this review.'}</span>
+            </li>
+          ))}
+        </ul>
+      </details>
+    )
+  }
 </div>
 
 <style>

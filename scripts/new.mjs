@@ -36,17 +36,18 @@ country: Scotland
 type: Single malt        # one of the types in src/data/whiskey.ts
 age: 16                  # a number, or null when there is no age statement
 abv: 43
-price: 100               # what you paid, in dollars
+price: 100               # the price of a full bottle, in dollars
+# source: sample         # remove the "#" if you reviewed it from a sample, not a full bottle
 # batch: ""              # optional
 # bottledYear: 2024      # optional
 summary: "One line shown on cards and in search results."
 # image: /bottles/whiskey/${slugify(name)}.webp   # add after running: npm run photo
-ratings: { nose: 0.0, palate: 0.0, finish: 0.0, value: 0.0, overall: 0.0 }
+ratings: { nose: 0.0, palate: 0.0, finish: 0.0, overall: 0.0 }
 ratingNotes:
   nose: "One or two lines on why the nose earns its score."
   palate: "One or two lines on why the palate earns its score."
   finish: "One or two lines on why the finish earns its score."
-  value: "One or two lines on why the value earns its score."
+value: "Is it worth the money? Say so in words. Price never changes a score."   # optional
 flavorProfile:           # 3 to 6, labels from src/data/whiskey.ts, intensity 0 to 100
   - { label: Peat and smoke, intensity: 50 }
   - { label: Sweet and sherry, intensity: 50 }
@@ -72,18 +73,19 @@ house: "House name"
 year: ${today.slice(0, 4)}
 concentration: Eau de Parfum   # one of the concentrations in src/data/fragrance.ts
 audience: Unisex               # Unisex, Women or Men
-price: 100                     # what you paid, in dollars
+price: 100                     # the price of a full bottle, in dollars
 volumeMl: 100
+# source: sample               # remove the "#" if you reviewed it from a sample, then delete the two "bottle" entries below
 # batch: ""                    # optional
 summary: "One line shown on cards and in search results."
 # image: /bottles/fragrance/${slugify(name)}.webp   # add after running: npm run photo
-ratings: { scent: 0.0, longevity: 0.0, sillage: 0.0, bottle: 0.0, value: 0.0, overall: 0.0 }
+ratings: { scent: 0.0, longevity: 0.0, sillage: 0.0, bottle: 0.0, overall: 0.0 }
 ratingNotes:
   scent: "One or two lines on why the scent earns its score."
   longevity: "One or two lines on why the longevity earns its score."
   sillage: "One or two lines on why the sillage earns its score."
   bottle: "One or two lines on why the bottle earns its score."
-  value: "One or two lines on why the value earns its score."
+value: "Is it worth the money? Say so in words. Price never changes a score."   # optional
 accords:                       # 3 to 8, labels from src/data/accords.ts, weight 0 to 100
   - { label: Vanilla, weight: 100 }
   - { label: Sweet, weight: 80 }
@@ -119,7 +121,7 @@ picks:                         # 2 to 4, the first one gets the gold rule
   - useCase: Best value
     winner: second-review
     why: "One sentence on why."
-# noteOverrides:               # optional: replace a review's score note in this rundown only
+# noteOverrides:               # optional: replace a review's score note (or its value note) in this rundown only
 #   first-review:
 #     nose: "Different wording for this comparison."
 summary: "One line shown on cards and in search results."

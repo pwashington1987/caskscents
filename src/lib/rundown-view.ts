@@ -1,6 +1,6 @@
 /** Turns a rundown and its reviews into exactly what the rundown page shows. */
-import type { ReviewView } from './review-view.ts';
-import type { World } from './validate.ts';
+import type { ReviewView, ScoreLine } from './review-view.ts';
+import { attributesFor, type World } from './validate.ts';
 
 export type RundownData = {
   title: string;
@@ -15,6 +15,11 @@ export type RundownData = {
 export type RundownItem = { id: string; view: ReviewView };
 
 export type Cell = { id: string; name: string; short: string; score: string; note: string; best: boolean };
+export type ValueCell = { id: string; name: string; short: string; note: string };
+
+/** Shown where a bottle has no score for something, because it was reviewed from a sample. */
+const NO_SCORE = '–';
+const NO_SCORE_NOTE = 'Reviewed from a sample, so this is not scored.';
 
 export type RundownView = {
   world: World;
@@ -25,6 +30,8 @@ export type RundownView = {
   picks: { useCase: string; winnerId: string; winner: string; why: string; lead: boolean }[];
   facts: { label: string; values: string[] }[];
   attributes: { key: string; label: string; cells: Cell[]; ranked: Cell[]; top: string }[];
+  /** Each bottle's value note, in words. Left out when no bottle has one. Never scored. */
+  value?: ValueCell[];
   overall: { id: string; score: string; best: boolean }[];
   profile: { title: string; groups: { label: string; rows: { short: string; percent: number }[] }[] };
 };
@@ -58,30 +65,45 @@ export function rundownView(data: RundownData, items: RundownItem[]): RundownVie
   const groups = new Set(items.map((i) => i.view.group));
   const sharedGroup = groups.size === 1 ? [...groups][0] : '';
 
-  const attributes = items[0].view.scores.map((line, index) => {
-    const values = items.map((i) => i.view.scores[index].percent);
-    const max = Math.max(...values);
-    const cells: Cell[] = items.map(({ id, view }) => {
-      const score = view.scores[index];
+  // One row per score. A bottle without that score (a sample has no bottle score)
+  // gets a dash, and a row nobody has a score for is left out.
+  const attributes = attributesFor(data.category).flatMap((key) => {
+    const lines = items.map((i) => i.view.scores.find((s) => s.key === key));
+    const rated = lines.filter((line): line is ScoreLine => line !== undefined);
+    if (rated.length === 0) return [];
+    const max = Math.max(...rated.map((line) => line.percent));
+    const cells: Cell[] = items.map(({ id, view }, index) => {
+      const line = lines[index];
       return {
         id,
         name: view.name,
         short: byId.get(id)!.short,
-        score: score.score,
-        note: data.noteOverrides?.[id]?.[line.key] ?? score.note,
-        best: score.percent === max,
+        score: line ? line.score : NO_SCORE,
+        note: line ? (data.noteOverrides?.[id]?.[key] ?? line.note) : NO_SCORE_NOTE,
+        best: line ? line.percent === max : false,
       };
     });
-    const ranked = [...cells].sort((x, y) => Number(y.score) - Number(x.score));
+    const rank = (cell: Cell) => (cell.score === NO_SCORE ? -1 : Number(cell.score));
+    const ranked = [...cells].sort((x, y) => rank(y) - rank(x));
     const leaders = cells.filter((c) => c.best);
-    return {
-      key: line.key,
-      label: line.label,
-      cells,
-      ranked,
-      top: `${listNames(leaders.map((c) => c.name))}, ${leaders[0].score}`,
-    };
+    return [
+      {
+        key,
+        label: rated[0].label,
+        cells,
+        ranked,
+        top: `${listNames(leaders.map((c) => c.name))}, ${leaders[0].score}`,
+      },
+    ];
   });
+
+  const valueCells: ValueCell[] = items.map(({ id, view }) => ({
+    id,
+    name: view.name,
+    short: byId.get(id)!.short,
+    note: data.noteOverrides?.[id]?.value ?? view.value ?? '',
+  }));
+  const value = valueCells.some((cell) => cell.note) ? valueCells : undefined;
 
   const overallMax = Math.max(...items.map((i) => Number(i.view.overall)));
   const overall = items.map(({ id, view }) => ({
@@ -136,6 +158,7 @@ export function rundownView(data: RundownData, items: RundownItem[]): RundownVie
     })),
     facts,
     attributes,
+    value,
     overall,
     profile: { title: items[0].view.bars.title === 'Main accords' ? 'Accords' : 'Flavor profile', groups: profileGroups },
   };

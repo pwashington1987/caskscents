@@ -9,13 +9,13 @@ audience: Unisex
 price: 195
 volumeMl: 100
 summary: "Sample entry for development. Cherry and vanilla with the lights turned down."
-ratings: { scent: 8.8, longevity: 7.5, sillage: 8.2, bottle: 9.0, value: 7.4, overall: 8.4 }
+value: "Fair for niche. Sample before you commit to a full bottle."
+ratings: { scent: 8.8, longevity: 7.5, sillage: 8.2, bottle: 9.0, overall: 8.4 }
 ratingNotes:
   scent: "A grown-up cherry that dries down soft and powdery instead of sticky."
   longevity: "Six to eight hours on skin. Good, not exceptional at this price."
   sillage: "Fills a room for two hours, then stays close and polite."
   bottle: "Heavy glass, magnetic cap, a sprayer that mists evenly."
-  value: "Fair for niche. Sample before you commit to a full bottle."
 accords:
   - { label: Vanilla, weight: 100 }
   - { label: Sweet, weight: 84 }

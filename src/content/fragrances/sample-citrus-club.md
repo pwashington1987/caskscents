@@ -9,13 +9,13 @@ audience: Men
 price: 85
 volumeMl: 100
 summary: "Sample entry for development. A bright citrus opener that does not last the afternoon."
-ratings: { scent: 7.8, longevity: 5.5, sillage: 6.0, bottle: 7.0, value: 7.6, overall: 7.0 }
+value: "Fair at this price if you accept it is a morning scent."
+ratings: { scent: 7.8, longevity: 5.5, sillage: 6.0, bottle: 7.0, overall: 7.0 }
 ratingNotes:
   scent: "Sharp grapefruit and mint. Clean, cheerful, a little generic."
   longevity: "Three hours, four if you are lucky. Bring the bottle."
   sillage: "Noticeable for the first half hour, then a skin scent."
   bottle: "Plain but solid. The cap is light plastic."
-  value: "Fair at this price if you accept it is a morning scent."
 accords:
   - { label: Citrus, weight: 100 }
   - { label: Fresh, weight: 82 }

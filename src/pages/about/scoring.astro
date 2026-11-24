@@ -3,11 +3,11 @@ import Base from '../../layouts/Base.astro';
 
 const scale = [
   { range: '9.5 to 10', word: 'Exceptional', meaning: 'One of the best I have had. I would replace it the day it ran out.' },
-  { range: '8.5 to 9.4', word: 'Excellent', meaning: 'Does almost everything right. Easy to recommend at its price.' },
-  { range: '7.5 to 8.4', word: 'Very good', meaning: 'Glad to own it. One or two things hold it back.' },
-  { range: '6.5 to 7.4', word: 'Good', meaning: 'Enjoyable, with clear reservations. Worth it for the right person or price.' },
+  { range: '8.5 to 9.4', word: 'Excellent', meaning: 'Does almost everything right. Easy to recommend.' },
+  { range: '7.5 to 8.4', word: 'Very good', meaning: 'Glad to have it. One or two things hold it back.' },
+  { range: '6.5 to 7.4', word: 'Good', meaning: 'Enjoyable, with clear reservations. Right for some people, not for everyone.' },
   { range: '5 to 6.4', word: 'Fine', meaning: 'Nothing wrong, nothing memorable. Not worth seeking out.' },
-  { range: 'Below 5', word: 'Not recommended', meaning: 'Flawed, or far too expensive for what it is.' },
+  { range: 'Below 5', word: 'Not recommended', meaning: 'Flawed in a way that is hard to get past.' },
 ];
 ---
 
@@ -37,15 +37,22 @@ const scale = [
     <h2 class="display">What goes into it</h2>
     <ul class="points">
       <li>
-        <strong>Whiskey</strong> is scored on nose, palate, finish and value.
-        <strong>Fragrance</strong> is scored on scent, longevity, sillage, bottle and value.
+        <strong>Whiskey</strong> is scored on nose, palate and finish.
+        <strong>Fragrance</strong> is scored on scent, longevity, sillage and the bottle itself.
       </li>
       <li>Each of those scores comes with a line saying why it earned it.</li>
       <li>
         The overall score is my judgment of the whole bottle. It is not an average, so it can sit a little
         above or below the others.
       </li>
-      <li>Value is judged against the price I paid, which is shown on every review.</li>
+      <li>
+        <strong>Price never changes a score.</strong> A review says in words whether the bottle is worth the money,
+        and shows the price, so you can weigh that for yourself.
+      </li>
+      <li>
+        <strong>Bottles and samples.</strong> Some reviews come from my own bottle and some from a sample. Each
+        review says which. A fragrance tried from a sample gets no score for the bottle itself.
+      </li>
       <li>Scores are one person's palate and nose. Use them as a starting point, not a verdict.</li>
     </ul>
   </article>

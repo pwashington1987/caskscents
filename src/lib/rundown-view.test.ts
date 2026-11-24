@@ -2,8 +2,8 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { rundownView } from './rundown-view.ts';
 import type { RundownData } from './rundown-view.ts';
-import { whiskeyView } from './review-view.ts';
-import type { WhiskeyData } from './review-view.ts';
+import { fragranceView, whiskeyView } from './review-view.ts';
+import type { FragranceData, WhiskeyData } from './review-view.ts';
 
 const base: WhiskeyData = {
   name: 'A',
@@ -16,8 +16,9 @@ const base: WhiskeyData = {
   price: 110,
   currency: 'USD',
   summary: 's',
-  ratings: { nose: 9.2, palate: 9.4, finish: 9.5, value: 7.8, overall: 9.1 },
-  ratingNotes: { nose: 'a nose', palate: 'a palate', finish: 'a finish', value: 'a value' },
+  ratings: { nose: 9.2, palate: 9.4, finish: 9.5, overall: 9.1 },
+  ratingNotes: { nose: 'a nose', palate: 'a palate', finish: 'a finish' },
+  value: 'a value',
   flavorProfile: [
     { label: 'Peat and smoke', intensity: 92 },
     { label: 'Sweet and sherry', intensity: 62 },
@@ -36,8 +37,9 @@ const b = item('b', {
   name: 'Beta 10',
   distillery: 'Beta',
   price: 55,
-  ratings: { nose: 8.4, palate: 8.0, finish: 9.5, value: 8.6, overall: 8.2 },
-  ratingNotes: { nose: 'b nose', palate: 'b palate', finish: 'b finish', value: 'b value' },
+  ratings: { nose: 8.4, palate: 9.6, finish: 9.5, overall: 8.2 },
+  ratingNotes: { nose: 'b nose', palate: 'b palate', finish: 'b finish' },
+  value: 'b value',
   flavorProfile: [
     { label: 'Peat and smoke', intensity: 98 },
     { label: 'Citrus', intensity: 35 },
@@ -51,8 +53,8 @@ const c = item('c', {
   type: 'Bourbon',
   abv: 50,
   price: 38,
-  ratings: { nose: 8.0, palate: 8.3, finish: 7.8, value: 9.2, overall: 8.3 },
-  ratingNotes: { nose: 'c nose', palate: 'c palate', finish: 'c finish', value: 'c value' },
+  ratings: { nose: 8.0, palate: 8.3, finish: 7.8, overall: 8.3 },
+  ratingNotes: { nose: 'c nose', palate: 'c palate', finish: 'c finish' },
   flavorProfile: [{ label: 'Caramel and toffee', intensity: 80 }],
 });
 
@@ -101,12 +103,12 @@ test('picks carry the winner name, and only the first leads', () => {
 
 test('each attribute lists every bottle with its score and note, marking the best', () => {
   const v = rundownView(data(), [a, b]);
-  assert.deepEqual(v.attributes.map((x) => x.label), ['Nose', 'Palate', 'Finish', 'Value']);
+  assert.deepEqual(v.attributes.map((x) => x.label), ['Nose', 'Palate', 'Finish']);
   assert.deepEqual(v.attributes[0].cells, [
     { id: 'a', name: 'Alpha 16', short: 'Alpha', score: '9.2', note: 'a nose', best: true },
     { id: 'b', name: 'Beta 10', short: 'Beta', score: '8.4', note: 'b nose', best: false },
   ]);
-  assert.deepEqual(v.attributes[3].cells.map((x) => x.best), [false, true]);
+  assert.deepEqual(v.attributes[1].cells.map((x) => x.best), [false, true]);
 });
 
 test('a tie marks both bottles as best', () => {
@@ -116,8 +118,8 @@ test('a tie marks both bottles as best', () => {
 
 test('ranked cells run highest first, and the top line names the leader', () => {
   const v = rundownView(data(), [a, b]);
-  assert.deepEqual(v.attributes[3].ranked.map((x) => x.id), ['b', 'a']);
-  assert.equal(v.attributes[3].top, 'Beta 10, 8.6');
+  assert.deepEqual(v.attributes[1].ranked.map((x) => x.id), ['b', 'a']);
+  assert.equal(v.attributes[1].top, 'Beta 10, 9.6');
   assert.equal(v.attributes[2].top, 'Alpha 16 and Beta 10, 9.5');
 });
 
@@ -139,7 +141,8 @@ test('fact rows line up one value per bottle', () => {
   const v = rundownView(data({ items: ['a', 'c'] }), [a, c]);
   assert.deepEqual(v.facts, [
     { label: 'ABV', values: ['43%', '50%'] },
-    { label: 'Paid', values: ['$110', '$38'] },
+    { label: 'Price', values: ['$110', '$38'] },
+    { label: 'Tried from', values: ['Full bottle', 'Full bottle'] },
   ]);
 });
 
@@ -164,4 +167,77 @@ test('the profile keeps at most five groups', () => {
   const one = item('a', { name: 'Alpha 16', flavorProfile });
   const two = item('b', { name: 'Beta 10', distillery: 'Beta', flavorProfile });
   assert.equal(rundownView(data(), [one, two]).profile.groups.length, 5);
+});
+
+test('value is a row of words, one per bottle, with no scores', () => {
+  const silent = item('c', { name: 'Gamma Reserve', distillery: 'Gamma', value: undefined });
+  const v = rundownView(data({ items: ['a', 'b', 'c'] }), [a, b, silent]);
+  assert.deepEqual(v.value, [
+    { id: 'a', name: 'Alpha 16', short: 'Alpha', note: 'a value' },
+    { id: 'b', name: 'Beta 10', short: 'Beta', note: 'b value' },
+    { id: 'c', name: 'Gamma Reserve', short: 'Gamma', note: '' },
+  ]);
+  assert.equal(v.attributes.some((x) => x.key === 'value'), false);
+});
+
+test('a value note can be reworded for one rundown', () => {
+  const v = rundownView(data({ noteOverrides: { a: { value: 'reworded' } } }), [a, b]);
+  assert.equal(v.value?.[0].note, 'reworded');
+});
+
+test('there is no value row when no bottle talks about value', () => {
+  const plain = (id: string, name: string, distillery: string) => item(id, { name, distillery, value: undefined });
+  assert.equal(rundownView(data(), [plain('a', 'Alpha 16', 'Alpha'), plain('b', 'Beta 10', 'Beta')]).value, undefined);
+});
+
+const scent: FragranceData = {
+  name: 'Full',
+  house: 'House One',
+  year: 2020,
+  concentration: 'Eau de Parfum',
+  audience: 'Unisex',
+  price: 150,
+  volumeMl: 100,
+  currency: 'USD',
+  summary: 's',
+  ratings: { scent: 8, longevity: 7, sillage: 7, bottle: 9, overall: 8 },
+  ratingNotes: { scent: 's', longevity: 'l', sillage: 'si', bottle: 'heavy glass' },
+  accords: [{ label: 'Vanilla', weight: 100 }],
+  pyramid: { top: ['Cherry'], heart: ['Rose'], base: ['Vanilla'] },
+  profile: { longevityHours: [6, 8], projection: 'Room', seasons: { winter: 1, spring: 1, summer: 1, autumn: 1 }, day: 50 },
+  wearsTested: 3,
+  bestFor: 'b',
+  tags: [],
+  draft: false,
+  reviewedDate: new Date('2026-11-18T00:00:00Z'),
+};
+const sampled: FragranceData = {
+  ...scent,
+  name: 'Sampled',
+  house: 'House Two',
+  source: 'sample',
+  ratings: { scent: 9, longevity: 7, sillage: 7, overall: 8.5 },
+  ratingNotes: { scent: 's', longevity: 'l', sillage: 'si' },
+};
+const fragranceData = (items: string[]) => data({ category: 'fragrance', items, picks: [] });
+
+test('a bottle reviewed from a sample shows a dash for the bottle score, and is never the best', () => {
+  const v = rundownView(fragranceData(['x', 'y']), [
+    { id: 'x', view: fragranceView(sampled) },
+    { id: 'y', view: fragranceView(scent) },
+  ]);
+  const bottle = v.attributes.find((x) => x.key === 'bottle')!;
+  assert.deepEqual(bottle.cells.map((c) => [c.score, c.best]), [['–', false], ['9.0', true]]);
+  assert.match(bottle.cells[0].note, /sample/i);
+  assert.deepEqual(bottle.ranked.map((c) => c.id), ['y', 'x']);
+  assert.equal(bottle.top, 'Full, 9.0');
+  assert.deepEqual(v.facts.at(-1), { label: 'Tried from', values: ['Sample', 'Full bottle'] });
+});
+
+test('the bottle row is left out when every bottle came from a sample', () => {
+  const v = rundownView(fragranceData(['x', 'y']), [
+    { id: 'x', view: fragranceView(sampled) },
+    { id: 'y', view: fragranceView({ ...sampled, name: 'Other', house: 'House Three' }) },
+  ]);
+  assert.deepEqual(v.attributes.map((x) => x.key), ['scent', 'longevity', 'sillage']);
 });

@@ -24,6 +24,8 @@ const score = z
   .refine((n) => Math.abs(n * 10 - Math.round(n * 10)) < 1e-9, 'Use one decimal place, such as 8.4.');
 
 const note = z.string().min(1).max(160, 'Keep a score note to one or two short lines (160 characters).');
+const NO_VALUE_SCORE =
+  'Value is not scored. Take "value" out of ratings and ratingNotes, and say whether it is worth the money in words, on a line of its own: value: "..."';
 const percent = z.number().min(0).max(100);
 const level = z.number().int().min(1).max(5);
 const summary = z.string().min(1).max(160, 'Keep the summary to one line (160 characters).');
@@ -31,6 +33,10 @@ const price = z.number().positive();
 const slug = z.string().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, 'Use the review file name without ".md".');
 
 const shared = {
+  // What the review was made from. A sample is reviewed the same way, and says so on the page.
+  source: z.enum(['bottle', 'sample'], { errorMap: () => ({ message: 'Use "bottle" or "sample".' }) }).default('bottle'),
+  // Whether it is worth the money, in words. Shown beside the scores, never counted in them.
+  value: z.string().min(1).max(240, 'Keep the value note to two or three short lines (240 characters).').optional(),
   shortName: z.string().max(16, 'Keep the short name to 16 characters; it labels narrow table columns.').optional(),
   currency: z.string().default('USD'),
   batch: z.string().optional(),
@@ -55,8 +61,8 @@ const whiskeys = defineCollection({
     abv: z.number().min(20).max(80),
     price,
     bottledYear: z.number().int().optional(),
-    ratings: z.object({ nose: score, palate: score, finish: score, value: score, overall: score }),
-    ratingNotes: z.object({ nose: note, palate: note, finish: note, value: note }),
+    ratings: z.object({ nose: score, palate: score, finish: score, overall: score }).strict(NO_VALUE_SCORE),
+    ratingNotes: z.object({ nose: note, palate: note, finish: note }).strict(NO_VALUE_SCORE),
     flavorProfile: z
       .array(
         z.object({
@@ -83,15 +89,13 @@ const fragrances = defineCollection({
     audience: vocab('audience', AUDIENCES, 'src/data/fragrance.ts'),
     price,
     volumeMl: z.number().positive(),
-    ratings: z.object({
-      scent: score,
-      longevity: score,
-      sillage: score,
-      bottle: score,
-      value: score,
-      overall: score,
-    }),
-    ratingNotes: z.object({ scent: note, longevity: note, sillage: note, bottle: note, value: note }),
+    // The bottle is only scored when the review came from a full bottle (checked below).
+    ratings: z
+      .object({ scent: score, longevity: score, sillage: score, bottle: score.optional(), overall: score })
+      .strict(NO_VALUE_SCORE),
+    ratingNotes: z
+      .object({ scent: note, longevity: note, sillage: note, bottle: note.optional() })
+      .strict(NO_VALUE_SCORE),
     accords: z
       .array(
         z.object({
@@ -117,6 +121,23 @@ const fragrances = defineCollection({
     wearsTested: z.number().int().positive(),
     bestFor: z.string().min(1).max(160),
     tags: z.array(vocab('tag', FRAGRANCE_TAGS, 'src/data/fragrance.ts')).default([]),
+  }).superRefine((review, ctx) => {
+    const scored = review.ratings.bottle !== undefined;
+    const explained = review.ratingNotes.bottle !== undefined;
+    if (review.source === 'bottle' && !scored) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['ratings', 'bottle'],
+        message: 'Add a bottle score. If you reviewed it from a sample, add the line "source: sample" and the bottle score can be left out.',
+      });
+    }
+    if (scored !== explained) {
+      ctx.addIssue({
+        code: 'custom',
+        path: [scored ? 'ratingNotes' : 'ratings', 'bottle'],
+        message: 'The bottle needs both a score (in ratings) and a note saying why (in ratingNotes), or neither.',
+      });
+    }
   }),
 });
 

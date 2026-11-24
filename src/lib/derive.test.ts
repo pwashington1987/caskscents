@@ -58,7 +58,9 @@ test('scores round to one decimal', () => {
 });
 
 test('subscore mean ignores overall', () => {
-  assert.equal(subscoreMean({ nose: 9, palate: 8, finish: 7, value: 8, overall: 1 }), 8);
+  assert.equal(subscoreMean({ nose: 9, palate: 8, finish: 7, overall: 1 }), 8);
+  // A score that was left out (a sample has no bottle score) is not counted as zero.
+  assert.equal(subscoreMean({ scent: 9, longevity: 7, bottle: undefined, overall: 1 }), 8);
 });
 
 test('longevity reads as a plain range', () => {

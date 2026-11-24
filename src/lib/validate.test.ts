@@ -7,7 +7,7 @@ const review = (id: string, overall: number, subs = overall): ReviewLite => ({
   id,
   world: 'whiskey',
   name: id,
-  ratings: { nose: subs, palate: subs, finish: subs, value: subs, overall },
+  ratings: { nose: subs, palate: subs, finish: subs, overall },
 });
 
 const reviews = new Map<string, ReviewLite>([
@@ -32,8 +32,8 @@ const errors = (issues: { level: string }[]) => issues.filter((i) => i.level ===
 const warnings = (issues: { level: string }[]) => issues.filter((i) => i.level === 'warning');
 
 test('scored attributes differ by world', () => {
-  assert.deepEqual(attributesFor('whiskey'), ['nose', 'palate', 'finish', 'value']);
-  assert.deepEqual(attributesFor('fragrance'), ['scent', 'longevity', 'sillage', 'bottle', 'value']);
+  assert.deepEqual(attributesFor('whiskey'), ['nose', 'palate', 'finish']);
+  assert.deepEqual(attributesFor('fragrance'), ['scent', 'longevity', 'sillage', 'bottle']);
 });
 
 test('a consistent review has no issues', () => {
@@ -111,4 +111,9 @@ test('a published rundown may not include a bottle that is still a draft', () =>
   assert.match(issues[0].message, /"b"/);
   assert.match(issues[0].message, /draft/);
   assert.deepEqual(draftConflicts(rundown(), new Set(['zzz'])), []);
+});
+
+test('a value note can be reworded in a rundown, though value is not a score', () => {
+  const ok = validateRundown(rundown({ noteOverrides: { a: { value: 'Worth it here.' } } }), reviews);
+  assert.equal(errors(ok).length, 0);
 });

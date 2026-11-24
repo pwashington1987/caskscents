@@ -87,6 +87,15 @@ const jsonLd = reviewJsonLd({
       <div class="scores">
         {view.scores.map((line) => <ScoreRow line={line} />)}
       </div>
+      {
+        view.value && (
+          <div class="value">
+            <h3 class="label">Value</h3>
+            <p>{view.value}</p>
+            <p class="muted aside">In words only. Price never changes a score.</p>
+          </div>
+        )
+      }
     </section>
 
     <section class="section wrap pair">
@@ -246,6 +255,29 @@ const jsonLd = reviewJsonLd({
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
     gap: 1.25rem 2.5rem;
+  }
+
+  /* Value sits with the scores but is plainly not one of them: words, no number, no bar. */
+  .value {
+    max-width: 44rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--rule);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .value h3 {
+    margin: 0;
+    font-weight: 400;
+  }
+  .value p {
+    line-height: 1.6;
+    color: var(--bone-soft);
+  }
+  .value .aside {
+    font-size: var(--text-xs);
+    color: var(--ash);
   }
 
   .pair {

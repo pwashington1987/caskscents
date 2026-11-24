@@ -7,12 +7,19 @@ import { labelColorOn, longevityLabel, priceTier, strengthBand } from './derive.
 import { formatAbv, formatDate, formatPrice, formatScore, whiskeyTypeLabel } from './labels.ts';
 import type { World } from './validate.ts';
 
+export type Source = 'bottle' | 'sample';
+
 type Shared = {
   name: string;
   shortName?: string;
+  /** The price of a full bottle when reviewed. A fact for the reader; it never changes a score. */
   price: number;
   currency: string;
   batch?: string;
+  /** What the review was made from. A full bottle unless it says otherwise. */
+  source?: Source;
+  /** Whether it is worth the money, in words. Never a score. */
+  value?: string;
   summary: string;
   image?: string;
   tags: string[];
@@ -29,8 +36,8 @@ export type WhiskeyData = Shared & {
   age: number | null;
   abv: number;
   bottledYear?: number;
-  ratings: { nose: number; palate: number; finish: number; value: number; overall: number };
-  ratingNotes: { nose: string; palate: string; finish: string; value: string };
+  ratings: { nose: number; palate: number; finish: number; overall: number };
+  ratingNotes: { nose: string; palate: string; finish: string };
   flavorProfile: { label: string; intensity: number }[];
   tastingNotes: { nose: string; palate: string; finish: string };
   profile: { peat: number; sweetness: number };
@@ -42,8 +49,9 @@ export type FragranceData = Shared & {
   concentration: string;
   audience: string;
   volumeMl: number;
-  ratings: { scent: number; longevity: number; sillage: number; bottle: number; value: number; overall: number };
-  ratingNotes: { scent: string; longevity: string; sillage: string; bottle: string; value: string };
+  /** The bottle itself is only scored when the review came from a full bottle. */
+  ratings: { scent: number; longevity: number; sillage: number; bottle?: number; overall: number };
+  ratingNotes: { scent: string; longevity: string; sillage: string; bottle?: string };
   accords: { label: string; weight: number }[];
   pyramid: { top: string[]; heart: string[]; base: string[] };
   profile: {
@@ -70,7 +78,10 @@ export type ReviewView = {
   meta: string[];
   overall: string;
   facts: string[];
+  source: Source;
   scores: ScoreLine[];
+  /** Whether it is worth the money, in words. Shown beside the scores but never counted in them. */
+  value?: string;
   bars: { title: string; style: 'filled' | 'thin'; items: Bar[] };
   notes: { title: string; rows: NoteRow[] };
   profile: {
@@ -94,23 +105,34 @@ export type ReviewView = {
 
 const capital = (word: string) => word[0].toUpperCase() + word.slice(1);
 
+/** One line per score that was given. A score left out (a sample has no bottle score) gets no line. */
 function scoreLines<K extends string>(
   keys: readonly K[],
-  ratings: Record<K, number>,
-  notes: Record<K, string>,
+  ratings: Partial<Record<K, number>>,
+  notes: Partial<Record<K, string>>,
 ): ScoreLine[] {
-  return keys.map((key) => ({
-    key,
-    label: capital(key),
-    score: formatScore(ratings[key]),
-    percent: Math.round(ratings[key] * 10),
-    note: notes[key],
-  }));
+  return keys.flatMap((key) => {
+    const rating = ratings[key];
+    if (rating === undefined) return [];
+    return [
+      {
+        key,
+        label: capital(key),
+        score: formatScore(rating),
+        percent: Math.round(rating * 10),
+        note: notes[key] ?? '',
+      },
+    ];
+  });
 }
+
+const SOURCE_FACT: Record<Source, string> = { bottle: 'From a full bottle', sample: 'From a sample' };
+const SOURCE_LABEL: Record<Source, string> = { bottle: 'Full bottle', sample: 'Sample' };
 
 export function whiskeyView(d: WhiskeyData): ReviewView {
   const strength = strengthBand(d.abv);
   const tier = priceTier(d.price);
+  const source = d.source ?? 'bottle';
   const flavors = [...d.flavorProfile].sort((a, b) => b.intensity - a.intensity);
   return {
     world: 'whiskey',
@@ -131,8 +153,11 @@ export function whiskeyView(d: WhiskeyData): ReviewView {
       ...(d.batch ? [`Batch ${d.batch}`] : []),
       ...(d.bottledYear ? [`Bottled ${d.bottledYear}`] : []),
       `Reviewed ${formatDate(d.reviewedDate)}`,
+      SOURCE_FACT[source],
     ],
-    scores: scoreLines(['nose', 'palate', 'finish', 'value'] as const, d.ratings, d.ratingNotes),
+    source,
+    scores: scoreLines(['nose', 'palate', 'finish'] as const, d.ratings, d.ratingNotes),
+    value: d.value,
     bars: {
       title: 'Flavor profile',
       style: 'thin',
@@ -161,7 +186,8 @@ export function whiskeyView(d: WhiskeyData): ReviewView {
     group: d.region,
     compareFacts: [
       { label: 'ABV', value: formatAbv(d.abv) },
-      { label: 'Paid', value: formatPrice(d.price, d.currency) },
+      { label: 'Price', value: formatPrice(d.price, d.currency) },
+      { label: 'Tried from', value: SOURCE_LABEL[source] },
     ],
     cardMeta: [
       whiskeyTypeLabel(d.type, d.country),
@@ -180,6 +206,7 @@ export function fragranceView(d: FragranceData): ReviewView {
   const seasons = (['winter', 'spring', 'summer', 'autumn'] as const)
     .map((s) => ({ label: capital(s), percent: d.profile.seasons[s] }))
     .sort((a, b) => b.percent - a.percent);
+  const source = d.source ?? 'bottle';
   return {
     world: 'fragrance',
     name: d.name,
@@ -193,12 +220,11 @@ export function fragranceView(d: FragranceData): ReviewView {
       ...(d.batch ? [`Batch ${d.batch}`] : []),
       `Reviewed ${formatDate(d.reviewedDate)}`,
       d.wearsTested === 1 ? 'Worn once' : `Worn ${d.wearsTested} times`,
+      SOURCE_FACT[source],
     ],
-    scores: scoreLines(
-      ['scent', 'longevity', 'sillage', 'bottle', 'value'] as const,
-      d.ratings,
-      d.ratingNotes,
-    ),
+    source,
+    scores: scoreLines(['scent', 'longevity', 'sillage', 'bottle'] as const, d.ratings, d.ratingNotes),
+    value: d.value,
     bars: {
       title: 'Main accords',
       style: 'filled',
@@ -231,7 +257,8 @@ export function fragranceView(d: FragranceData): ReviewView {
     group: family,
     compareFacts: [
       { label: 'Size', value: `${d.volumeMl} ml` },
-      { label: 'Paid', value: formatPrice(d.price, d.currency) },
+      { label: 'Price', value: formatPrice(d.price, d.currency) },
+      { label: 'Tried from', value: SOURCE_LABEL[source] },
     ],
     cardMeta: [d.house, d.concentration, formatPrice(d.price, d.currency)].join(' · '),
     facets: { house: [d.house], family: [family], tag: d.tags },

@@ -10,12 +10,12 @@ age: 16
 abv: 43
 price: 110
 summary: "Sample entry for development. A smoky, sherried Islay malt with a very long finish."
-ratings: { nose: 9.2, palate: 9.4, finish: 9.5, value: 7.8, overall: 9.1 }
+value: "Worth it, but this is real money for a bottle you will finish quickly."
+ratings: { nose: 9.2, palate: 9.4, finish: 9.5, overall: 9.1 }
 ratingNotes:
   nose: "Peat smoke, sea salt and a sweet sherried undertow. Layered from the first sniff."
   palate: "Oily and full. Smoke, dried fruit and salt in balance; nothing shouts."
   finish: "Very long. The smoke fades to sweet peat and leaves the mouth dry."
-  value: "Worth it, but this is real money for a bottle you will finish quickly."
 flavorProfile:
   - { label: Peat and smoke, intensity: 92 }
   - { label: Sweet and sherry, intensity: 62 }
