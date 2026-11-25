@@ -218,3 +218,93 @@ test('a list of distilleries works the same way for whiskey', () => {
   assert.ok('view' in result);
   assert.deepEqual(result.view.rows.map((r) => r.brandKnown), [true, false, false, false, false]);
 });
+
+// ---- Checks on a list file -------------------------------------------------
+
+import { MATCH_KEYS, validateTop5 } from './top5.ts';
+import type { ReviewLite } from './validate.ts';
+
+const lite = (id: string, world: 'whiskey' | 'fragrance' = 'fragrance'): ReviewLite => ({
+  id,
+  world,
+  name: id,
+  ratings: { overall: 8 },
+});
+const known = new Map<string, ReviewLite>(
+  ['velvet-cherry', 'grey-suede', 'citrus-club', 'midnight', 'amber-room', 'iris-note'].map((id) => [id, lite(id)]),
+);
+known.set('harbour-smoke', lite('harbour-smoke', 'whiskey'));
+
+const fivePicks = ['velvet-cherry', 'grey-suede', 'citrus-club', 'midnight', 'amber-room'].map((review) => ({ review }));
+const check = (over: Partial<Top5Data>, drafts: string[] = []) =>
+  validateTop5({ id: 'my-list', ...list(over) }, known, new Set(drafts));
+const messages = (over: Partial<Top5Data>, drafts: string[] = []) => check(over, drafts).map((i) => i.message);
+
+test('the rule words each world can use', () => {
+  assert.deepEqual(MATCH_KEYS.whiskey, ['tag', 'age', 'region', 'type', 'distillery', 'maxPrice']);
+  assert.deepEqual(MATCH_KEYS.fragrance, ['accord', 'tag', 'house', 'family', 'concentration', 'audience', 'maxPrice']);
+});
+
+test('a correct automatic list and a correct hand-set list raise nothing', () => {
+  assert.deepEqual(check({ match: { accord: 'Vanilla', maxPrice: 200 } }), []);
+  assert.deepEqual(check({ picks: fivePicks }), []);
+  assert.deepEqual(check({ picks: [...fivePicks.slice(0, 4), { name: 'Not Reviewed Yet', why: 'Soon.' }] }), []);
+});
+
+test('problems are reported against the list file, as errors', () => {
+  const issues = check({});
+  assert.equal(issues.length, 1);
+  assert.equal(issues[0].level, 'error');
+  assert.equal(issues[0].where, 'top5/my-list');
+});
+
+test('a list needs a rule or five picks, and not both', () => {
+  assert.match(messages({})[0], /needs either "match".*or "picks"/);
+  assert.match(messages({ match: { accord: 'Vanilla' }, picks: fivePicks })[0], /both "match" and "picks"/);
+  assert.match(messages({ match: {} })[0], /"match" is empty/);
+});
+
+test('a rule word from the other world is refused, with the words that are allowed', () => {
+  const [message] = messages({ match: { age: 12 } });
+  assert.match(message, /"age" cannot be used on a fragrance list/);
+  assert.match(message, /accord, tag, house, family, concentration, audience, maxPrice/);
+  assert.match(messages({ category: 'whiskey', match: { accord: 'Vanilla' } })[0], /"accord" cannot be used on a whiskey list/);
+});
+
+test('a misspelled word in a rule stops the build and suggests the right one', () => {
+  assert.match(messages({ match: { accord: 'Vanila' } })[0], /Did you mean "Vanilla"\?/);
+  assert.match(messages({ match: { tag: 'date-nite' } })[0], /Did you mean "date-night"\?/);
+  assert.match(messages({ match: { family: 'Gourmond' } })[0], /Did you mean "Gourmand"\?/);
+  assert.match(messages({ match: { concentration: 'Eau de Parfume' } })[0], /Did you mean "Eau de Parfum"\?/);
+  assert.match(messages({ match: { audience: 'Unisexx' } })[0], /Did you mean "Unisex"\?/);
+  assert.match(messages({ category: 'whiskey', match: { region: 'Isla' } })[0], /Did you mean "Islay"\?/);
+  assert.match(messages({ category: 'whiskey', match: { type: 'Single mallt' } })[0], /Did you mean "Single malt"\?/);
+  assert.match(messages({ category: 'whiskey', match: { tag: 'peeted' } })[0], /Did you mean "peated"\?/);
+  // Houses and distilleries are free text, so they are not checked against a list.
+  assert.deepEqual(check({ match: { house: 'Any House At All' } }), []);
+});
+
+test('houses are for fragrance, distilleries for whiskey, and both are always set by hand', () => {
+  const names = ['A', 'B', 'C', 'D', 'E'].map((name) => ({ name }));
+  assert.deepEqual(check({ of: 'houses', picks: names }), []);
+  assert.match(messages({ category: 'whiskey', of: 'houses', picks: names })[0], /"of: houses" is for fragrance lists/);
+  assert.match(messages({ of: 'distilleries', picks: names })[0], /"of: distilleries" is for whiskey lists/);
+  assert.match(messages({ of: 'houses', match: { tag: 'niche' } })[0], /always set by hand/);
+  assert.match(messages({ of: 'houses', picks: [{ review: 'velvet-cherry' }, ...names.slice(1)] })[0], /pick 1 uses "review".*Use "name"/);
+});
+
+test('a hand-set list has exactly five picks, each a review or a name', () => {
+  assert.match(messages({ picks: fivePicks.slice(0, 4) })[0], /has 4 picks.*exactly five/);
+  assert.match(messages({ picks: [...fivePicks.slice(0, 4), {}] })[0], /pick 5 needs either "review" or "name"/);
+  assert.match(messages({ picks: [...fivePicks.slice(0, 4), { review: 'amber-room', name: 'Amber Room' }] })[0], /pick 5 has both "review" and "name"/);
+});
+
+test('a picked review must exist, be in the right world, be published, and appear once', () => {
+  const with5th = (review: string) => [...fivePicks.slice(0, 4), { review }];
+  const missing = messages({ picks: with5th('iris-not') })[0];
+  assert.match(missing, /pick 5 names "iris-not", but there is no fragrance review with that file name/);
+  assert.match(missing, /Did you mean "iris-note"\?/);
+  assert.match(messages({ picks: with5th('harbour-smoke') })[0], /pick 5 names "harbour-smoke", which is a whiskey review/);
+  assert.match(messages({ picks: with5th('amber-room') }, ['amber-room'])[0], /pick 5 names "amber-room", which is still marked draft/);
+  assert.match(messages({ picks: with5th('velvet-cherry') })[0], /"velvet-cherry" is picked more than once/);
+});

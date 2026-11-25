@@ -5,13 +5,14 @@
  *   npm run new whiskey "Lagavulin 16"
  *   npm run new fragrance "Rouge Smoking"
  *   npm run new rundown "The Islay Peat Showdown"
+ *   npm run new top5 "Vanilla fragrances"
  *
  * The new file is marked draft, so it never publishes until you remove that line.
  */
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
-const FOLDERS = { whiskey: 'whiskeys', fragrance: 'fragrances', rundown: 'rundowns' };
+const FOLDERS = { whiskey: 'whiskeys', fragrance: 'fragrances', rundown: 'rundowns', top5: 'top5' };
 
 export function slugify(name) {
   return name
@@ -132,12 +133,37 @@ publishDate: ${today}
 
 Write the story of the comparison here.
 `,
+
+  top5: (name, today) => `---
+draft: true
+title: ${quote(name)}
+category: fragrance            # whiskey or fragrance
+intro: "One line under the title."
+# Ranked by score: every review that fits this rule, best five shown.
+# Fragrance rules can use: accord, tag, house, family, concentration, audience, maxPrice
+# Whiskey rules can use:   tag, age, region, type, distillery, maxPrice
+# Use more than one to narrow it, such as { tag: peated, maxPrice: 60 }
+match: { accord: Vanilla }
+# Or set the five by hand: delete the "match" line above and remove the "#" from these.
+# Use "review" for a bottle you have reviewed, or "name" for one you have not.
+# For a list of houses or distilleries, add "of: houses" or "of: distilleries" and use "name".
+# picks:
+#   - review: first-review-file-name
+#     why: "One line on why it is number one."
+#   - review: second-review-file-name
+#   - review: third-review-file-name
+#   - name: "A bottle not reviewed yet"
+#     why: "Why it still makes the list."
+#   - review: fifth-review-file-name
+publishDate: ${today}
+---
+`,
 };
 
 export function create({ kind, name, root = process.cwd(), today = new Date().toISOString().slice(0, 10) }) {
   const folder = FOLDERS[kind];
   if (!folder) {
-    throw new Error(`"${kind}" is not something I can create. Use whiskey, fragrance or rundown.`);
+    throw new Error(`"${kind}" is not something I can create. Use whiskey, fragrance, rundown or top5.`);
   }
   const slug = slugify(name ?? '');
   if (!slug) {
@@ -160,8 +186,11 @@ if (isMain) {
     const { file, slug } = create({ kind, name: rest.join(' ') });
     console.log(`Created ${file}`);
     console.log('It is marked draft: it shows while you run "npm run dev" and never publishes.');
-    if (kind !== 'rundown') {
+    if (kind === 'whiskey' || kind === 'fragrance') {
       console.log(`Photo: npm run photo ${slug} path/to/your-photo.jpg`);
+    }
+    if (kind === 'top5') {
+      console.log('A list ranked by score appears on the site once five reviews fit its rule.');
     }
     console.log('When it is ready, delete the "draft: true" line.');
   } catch (error) {

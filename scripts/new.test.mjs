@@ -42,7 +42,7 @@ test('refuses to overwrite an existing file', () => {
 });
 
 test('explains an unknown kind or a missing name', () => {
-  assert.throws(() => create({ kind: 'gin', name: 'x', root: root() }), /whiskey, fragrance or rundown/);
+  assert.throws(() => create({ kind: 'gin', name: 'x', root: root() }), /whiskey, fragrance, rundown or top5/);
   assert.throws(() => create({ kind: 'whiskey', name: '', root: root() }), /Give it a name/);
 });
 
@@ -54,4 +54,16 @@ test('new reviews have no value score: value is a line of words, and a sample ca
     assert.match(text, /^value: "/m);
     assert.match(text, /^# source: sample/m);
   }
+});
+
+test('creates a Top 5 list with a rule to fill in and hand-set picks ready to switch on', () => {
+  const root = mkdtempSync(join(tmpdir(), 'caskscents-new-'));
+  const { file, slug } = create({ kind: 'top5', name: 'Vanilla fragrances', root, today: '2026-11-24' });
+  assert.equal(slug, 'vanilla-fragrances');
+  assert.equal(file, join(root, 'src', 'content', 'top5', 'vanilla-fragrances.md'));
+  const text = readFileSync(file, 'utf8');
+  assert.match(text, /^---\ndraft: true\ntitle: "Vanilla fragrances"\n/);
+  assert.match(text, /^match: \{ accord: Vanilla \}/m);
+  assert.match(text, /^# picks:/m);
+  assert.match(text, /^publishDate: 2026-11-24$/m);
 });

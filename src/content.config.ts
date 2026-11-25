@@ -169,4 +169,49 @@ const pages = defineCollection({
   }),
 });
 
-export const collections = { whiskeys, fragrances, rundowns, pages };
+/**
+ * Top 5 lists. A list has either a `match` rule (ranked by score) or five
+ * `picks` (set by hand). The words in a rule are checked against the word
+ * lists when the site builds, in src/lib/top5.ts.
+ */
+const top5 = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/top5' }),
+  schema: z.object({
+    title: z.string().min(1),
+    category: z.enum(['whiskey', 'fragrance']),
+    of: z.enum(['bottles', 'houses', 'distilleries']).default('bottles'),
+    intro: z.string().max(200, 'Keep the intro to one or two lines (200 characters).').optional(),
+    match: z
+      .object({
+        accord: z.string(),
+        tag: z.string(),
+        house: z.string(),
+        family: z.string(),
+        concentration: z.string(),
+        audience: z.string(),
+        age: z.number().int().positive(),
+        region: z.string(),
+        type: z.string(),
+        distillery: z.string(),
+        maxPrice: z.number().positive(),
+      })
+      .partial()
+      .strict('A rule can use: accord, tag, house, family, concentration, audience, age, region, type, distillery, maxPrice.')
+      .optional(),
+    picks: z
+      .array(
+        z
+          .object({
+            review: slug.optional(),
+            name: z.string().min(1).optional(),
+            why: z.string().max(200, 'Keep the reason to one or two lines (200 characters).').optional(),
+          })
+          .strict('A pick can have: review, name, why.'),
+      )
+      .optional(),
+    draft: z.boolean().default(false),
+    publishDate: z.coerce.date(),
+  }),
+});
+
+export const collections = { whiskeys, fragrances, rundowns, pages, top5 };
