@@ -15,7 +15,8 @@ import { getSite } from '../../../lib/site.ts';
 import { viewOf } from '../../../lib/views.ts';
 import { similarTo } from '../../../lib/similar.ts';
 import { href } from '../../../lib/href.ts';
-import { reviewPath, rundownPath } from '../../../lib/paths.ts';
+import { reviewPath, rundownPath, top5Path } from '../../../lib/paths.ts';
+import { getTop5 } from '../../../lib/top5-lists.ts';
 import { absoluteUrl, defaultCard, reviewJsonLd } from '../../../lib/meta.ts';
 import { shareCard } from '../../../lib/photos.ts';
 import type { World } from '../../../lib/validate.ts';
@@ -47,6 +48,7 @@ const similarIds = similarTo(
 );
 const similar = similarIds.map((sid) => others.find((o) => o.id === sid)!);
 const appearsIn = site.rundownsContaining(world, id);
+const onLists = (await getTop5()).containing(world, id);
 
 const card = shareCard(view.image) ?? defaultCard(world);
 const full = (path: string) => absoluteUrl(Astro.site!, import.meta.env.BASE_URL, path);
@@ -159,6 +161,23 @@ const jsonLd = reviewJsonLd({
                     </li>
                   ))
                 }
+              </ul>
+            </div>
+          )
+        }
+        {
+          onLists.length > 0 && (
+            <div class="block">
+              <h2 class="muted small-heading">On these lists</h2>
+              <ul class="rundowns">
+                {onLists.map((list) => (
+                  <li>
+                    <a href={href(top5Path(world, list.id))}>
+                      <span class="kicker">Top 5</span>
+                      <span class="display rundown-title">{list.view.title}</span>
+                    </a>
+                  </li>
+                ))}
               </ul>
             </div>
           )

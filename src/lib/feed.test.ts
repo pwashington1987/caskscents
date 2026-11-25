@@ -48,3 +48,12 @@ test('a long feed keeps only the newest 30', () => {
   assert.ok(xml.includes('Bottle 39'));
   assert.equal(xml.includes('<title>Bottle 9</title>'), false);
 });
+
+test('a Top 5 list is filed under its own kind', () => {
+  const xml = buildFeed({
+    ...base,
+    items: [{ title: 'Top 5: Vanilla fragrances', link: 'https://caskscents.com/t/', description: 'The five best.', date: new Date('2026-11-24T00:00:00Z'), kind: 'Top 5' }],
+  });
+  assert.match(xml, /<title>Top 5: Vanilla fragrances<\/title>/);
+  assert.match(xml, /<category>Top 5<\/category>/);
+});

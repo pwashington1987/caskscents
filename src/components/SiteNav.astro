@@ -5,7 +5,8 @@
  */
 import Wordmark from './Wordmark.astro';
 import { href } from '../lib/href.ts';
-import { browseIndexPath, rundownsPath, shelfPath } from '../lib/paths.ts';
+import { browseIndexPath, rundownsPath, shelfPath, top5IndexPath } from '../lib/paths.ts';
+import { getTop5 } from '../lib/top5-lists.ts';
 import type { World } from '../lib/validate.ts';
 
 interface Props {
@@ -15,10 +16,13 @@ const { world } = Astro.props;
 const other: World | null = world === 'whiskey' ? 'fragrance' : world === 'fragrance' ? 'whiskey' : null;
 const title = (w: World) => (w === 'whiskey' ? 'Whiskey' : 'Fragrance');
 
+// "Top 5" appears once the world has at least one list with its five.
+const hasTop5 = world ? (await getTop5()).forWorld(world).length > 0 : false;
 const links: { label: string; path: string }[] = world
   ? [
       { label: 'Reviews', path: shelfPath(world) },
       { label: 'Rundowns', path: rundownsPath(world) },
+      ...(hasTop5 ? [{ label: 'Top 5', path: top5IndexPath(world) }] : []),
       world === 'whiskey'
         ? { label: 'Regions', path: browseIndexPath(world, 'regions') }
         : { label: 'Houses', path: browseIndexPath(world, 'houses') },

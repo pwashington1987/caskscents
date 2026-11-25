@@ -4,7 +4,7 @@ export type FeedItem = {
   link: string;
   description: string;
   date: Date;
-  kind: 'Review' | 'Rundown';
+  kind: 'Review' | 'Rundown' | 'Top 5';
 };
 
 const MAX_ITEMS = 30;

@@ -7,12 +7,13 @@ import Base from '../../layouts/Base.astro';
 import BottleGrid from '../../components/BottleGrid.astro';
 import BottlePhoto from '../../components/BottlePhoto.astro';
 import { getSite } from '../../lib/site.ts';
+import { getTop5 } from '../../lib/top5-lists.ts';
 import { listFor } from '../../lib/views.ts';
 import { rundownView } from '../../lib/rundown-view.ts';
 import { FACETS, facetLabel, groupBy } from '../../lib/taxonomy.ts';
 import { href } from '../../lib/href.ts';
 import { plural } from '../../lib/labels.ts';
-import { browsePath, rundownPath, rundownsPath, shelfPath, worldTitle } from '../../lib/paths.ts';
+import { browsePath, rundownPath, rundownsPath, shelfPath, top5IndexPath, top5Path, worldTitle } from '../../lib/paths.ts';
 import type { World } from '../../lib/validate.ts';
 
 export function getStaticPaths() {
@@ -42,6 +43,9 @@ const browse = FACETS[world]
     groups: groupBy(items.map((i) => ({ id: i.id, facets: i.view.facets })), facet.param),
   }))
   .filter((b) => b.groups.length > 0);
+
+const allLists = (await getTop5()).forWorld(world);
+const lists = allLists.slice(0, 4);
 
 const tagline = world === 'whiskey' ? 'What is in the glass' : 'What is on the skin';
 ---
@@ -118,6 +122,29 @@ const tagline = world === 'whiskey' ? 'What is in the glass' : 'What is on the s
                 <span class="number muted">{String(index + 1).padStart(2, '0')}</span>
                 <span class="display rundown-title">{r.view.title}</span>
                 <span class="muted count">{plural(r.view.bottles.length, 'bottle')}</span>
+              </a>
+            </li>
+          ))}
+        </ol>
+      </section>
+    )
+  }
+
+  {
+    lists.length > 0 && (
+      <section class="section wrap rundowns">
+        <div class="rundowns-intro">
+          <h2 class="display">Top 5</h2>
+          <p class="muted">Five to a list, ranked. Open a list to see who made it.</p>
+          <a class="all" href={href(top5IndexPath(world))}>All {plural(allLists.length, 'list')}</a>
+        </div>
+        <ol>
+          {lists.map((list, index) => (
+            <li>
+              <a href={href(top5Path(world, list.id))}>
+                <span class="number muted">{String(index + 1).padStart(2, '0')}</span>
+                <span class="display rundown-title">{list.view.title}</span>
+                <span class="muted count">{list.view.basis === 'score' ? 'Ranked by score' : 'My picks'}</span>
               </a>
             </li>
           ))}
