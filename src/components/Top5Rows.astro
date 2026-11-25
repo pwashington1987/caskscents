@@ -1,0 +1,178 @@
+---
+/**
+ * The five rows of a Top 5 list. A reviewed bottle links to its review and
+ * shows its score; a house links to its page when the site has reviews from it.
+ */
+import BottlePhoto from './BottlePhoto.astro';
+import { href } from '../lib/href.ts';
+import { browsePath, reviewPath, shelfPath } from '../lib/paths.ts';
+import { slugify } from '../lib/slug.ts';
+import type { Top5Row, Top5View } from '../lib/top5.ts';
+interface Props {
+  view: Top5View;
+}
+const { view } = Astro.props;
+const bottles = view.of === 'bottles';
+
+const linkFor = (row: Top5Row): string | undefined => {
+  if (row.reviewId) return href(reviewPath(view.world, row.reviewId));
+  if (!row.brandKnown) return undefined;
+  if (view.of === 'houses') return href(browsePath(view.world, 'houses', slugify(row.name)));
+  return `${href(shelfPath(view.world))}?q=${encodeURIComponent(row.name)}`;
+};
+---
+
+<ol class={`rows ${bottles ? '' : 'names'}`}>
+  {
+    view.rows.map((row) => {
+      const link = linkFor(row);
+      return (
+        <li class={link ? 'linked' : ''}>
+          <span class="rank display" aria-hidden="true">
+            {row.rank}
+          </span>
+          {bottles && (
+            <span class="photo">
+              <BottlePhoto world={view.world} name={row.name} image={row.view?.image} width={72} />
+            </span>
+          )}
+          <span class="text">
+            <span class="visually-hidden">Number {row.rank}: </span>
+            {link ? (
+              <a class="display name" href={link}>
+                {row.name}
+              </a>
+            ) : (
+              <span class="display name">{row.name}</span>
+            )}
+            {row.meta && <span class="muted meta">{row.meta}</span>}
+            {row.line && <span class="line">{row.line}</span>}
+          </span>
+          {(row.score || row.unreviewed) && (
+            <span class="end">
+              {row.score && (
+                <span class="score">
+                  <span class="visually-hidden">Score </span>
+                  {row.score}
+                </span>
+              )}
+              {row.unreviewed && <span class="muted soon">Not reviewed yet</span>}
+            </span>
+          )}
+        </li>
+      );
+    })
+  }
+</ol>
+
+<style>
+  .rows {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  li {
+    position: relative;
+    display: grid;
+    grid-template-columns: 2rem 3rem 1fr;
+    gap: 0.25rem 0.875rem;
+    align-items: center;
+    padding-block: 1.25rem;
+    border-top: 1px solid var(--rule);
+  }
+  .names li {
+    grid-template-columns: 2rem 1fr;
+  }
+  li:last-child {
+    border-bottom: 1px solid var(--rule);
+  }
+  .rank {
+    font-size: 2rem;
+    line-height: 1;
+    color: var(--ash-light);
+  }
+  li:first-child .rank {
+    color: var(--gold);
+  }
+  .photo {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    height: 4.5rem;
+  }
+  .photo :global(svg),
+  .photo :global(img) {
+    width: auto;
+    height: 100%;
+  }
+  .text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 0;
+  }
+  .name {
+    font-size: clamp(1.25rem, 1.1rem + 0.7vw, 1.625rem);
+    line-height: 1.15;
+    color: var(--bone);
+    transition: color 200ms var(--ease);
+  }
+  /* The whole row is the link's target, not just the name. */
+  a.name::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+  .linked:hover .name {
+    color: var(--accent-text);
+  }
+  .meta {
+    font-size: var(--text-xs);
+  }
+  .line {
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    color: var(--bone-soft);
+    max-width: 40rem;
+  }
+  .end {
+    grid-column: 3;
+    display: flex;
+    align-items: center;
+  }
+  .names .end {
+    grid-column: 2;
+  }
+  .score {
+    font-size: 1.125rem;
+    color: var(--accent-text);
+  }
+  .soon {
+    font-size: var(--text-xs);
+  }
+  @media (min-width: 720px) {
+    li {
+      grid-template-columns: 3.5rem 4.5rem 1fr auto;
+      gap: 0.25rem 1.5rem;
+      padding-block: 1.5rem;
+    }
+    .names li {
+      grid-template-columns: 3.5rem 1fr auto;
+    }
+    .rank {
+      font-size: 2.75rem;
+    }
+    .photo {
+      height: 6.5rem;
+    }
+    .end,
+    .names .end {
+      grid-column: auto;
+      justify-content: flex-end;
+      min-width: 4rem;
+    }
+    .score {
+      font-size: 1.5rem;
+    }
+  }
+</style>

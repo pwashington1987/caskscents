@@ -38,6 +38,10 @@ export type Site = {
   review: (world: World, id: string) => Review | undefined;
   rundownsFor: (world: World) => Rundown[];
   rundownsContaining: (world: World, id: string) => Rundown[];
+  /** Every visible review in its short form, used by checks that span files. */
+  lite: ReadonlyMap<string, ReviewLite>;
+  /** Reviews that exist but are hidden because they are still drafts. */
+  hiddenDrafts: ReadonlySet<string>;
 };
 
 let cached: Promise<Site> | undefined;
@@ -112,5 +116,7 @@ async function load(): Promise<Site> {
     rundownsFor: (world) => rundowns.filter((r) => r.data.category === world),
     rundownsContaining: (world, id) =>
       rundowns.filter((r) => r.data.category === world && r.data.items.includes(id)),
+    lite: liteReviews,
+    hiddenDrafts,
   };
 }

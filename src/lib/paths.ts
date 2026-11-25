@@ -6,6 +6,8 @@ export const reviewPath = (world: World, id: string) => `/${world}/reviews/${id}
 export const rundownPath = (world: World, id: string) => `/${world}/rundowns/${id}/`;
 export const worldTitle = (world: World) => (world === 'whiskey' ? 'Whiskey' : 'Fragrance');
 export const shelfPath = (world: World) => `/${world}/reviews/`;
+export const top5IndexPath = (world: World) => `/${world}/top-5/`;
+export const top5Path = (world: World, id: string) => `/${world}/top-5/${id}/`;
 export const feedPath = (world: World) => `/${world}/rss.xml`;
 export const rundownsPath = (world: World) => `/${world}/rundowns/`;
 export const browseIndexPath = (world: World, page: string) => `/${world}/${page}/`;
