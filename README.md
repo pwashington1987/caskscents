@@ -77,6 +77,43 @@ The build checks that every bottle exists, belongs to the right world and is pub
 
 **Winners stay on the rundown page.** Lists, the gateway, feeds and share previews say which questions a rundown answers, never who won. So keep the winner out of the rundown's `summary` line too. The gateway also shows no scores at all; review scores appear from the whiskey and fragrance homepages onward.
 
+## Add a Top 5 list
+
+```bash
+npm run new top5 "Vanilla fragrances"
+```
+
+This creates a file in `src/content/top5/`. A list is made in one of two ways.
+
+**Ranked by score.** Give the list a rule, and the site ranks every review that fits it and shows the best five. The list updates itself as you review more.
+
+```yaml
+match: { accord: Vanilla }
+```
+
+- Fragrance rules can use `accord`, `tag`, `house`, `family`, `concentration`, `audience` and `maxPrice`.
+- Whiskey rules can use `tag`, `age`, `region`, `type`, `distillery` and `maxPrice`.
+- Use more than one to narrow it: `{ tag: peated, maxPrice: 60 }` means peated and $60 or less.
+- An accord only counts when its weight in the review is 50 or more.
+- **A list shows only once five reviews fit.** Until then it stays hidden, and the build tells you how many it is waiting for.
+- Equal scores are settled by the newer review.
+
+**Set by hand.** Name the five yourself, in order, each with an optional line on why:
+
+```yaml
+picks:
+  - review: velvet-cherry
+    why: "The one that gets noticed across a table."
+  - review: grey-suede
+  - name: "A bottle I have not reviewed yet"
+  - review: amber-room
+  - review: citrus-club
+```
+
+Use `review` (the review's file name) for a bottle you have reviewed, or `name` for one you have not. For a list of houses or distilleries, add `of: houses` or `of: distilleries` and give five names. Those lists are always set by hand.
+
+Only a list's own page shows who is on it. The homepage, the list of lists, the feed and review pages show the title only.
+
 ## The About and scoring pages
 
 - **About.** Write your text in `src/content/pages/about.md`, under the settings block at the top. Plain paragraphs work; `## A heading` makes a heading. While that file has no text, the site has no About page and no link to it. As soon as it has text, the page appears at `/about/` and the footer links to it.

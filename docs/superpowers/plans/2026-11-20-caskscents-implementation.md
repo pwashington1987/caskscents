@@ -117,4 +117,5 @@ Status on 2026-11-20: M0 to M8 are built and live on the preview address. What r
 - **Package versions** are pinned: the workflow saved `package-lock.json` on its first run.
 - **Stress samples.** `sample-long-name-extrait` and `sample-four-bottle-stress-test` check a very long name and the four-bottle rundown.
 - **Value and samples (owner's rule, 2026-11-24).** Value is no longer a score. Whiskey is scored on nose, palate and finish; fragrance on scent, longevity, sillage and bottle. Each review may carry a `value:` note in words, shown beside the scores and as an unscored row in rundowns. A review may be marked `source: sample`; it says so on the page, and a fragrance from a sample has no bottle score (a dash in rundown tables). `price` now means the price of a full bottle, and "Paid" reads "Price".
+- **Top 5 lists (added 2026-11-24).** Designed in `docs/superpowers/specs/2026-11-24-caskscents-top-5-design.md` and built from `docs/superpowers/plans/2026-11-24-caskscents-top-5.md`. One difference from the design: a known distillery on a list links to the shelf search for its name, because whiskey has region and style pages but no distillery pages.
 
