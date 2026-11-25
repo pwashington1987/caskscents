@@ -1,7 +1,7 @@
 # CaskScents: Top 5 lists
 
 Date: 2026-11-24
-Status: waiting for the owner's approval
+Status: approved by the owner on 2026-11-24, and built. One difference from this design: a known distillery links to the shelf search for its name, because whiskey has no distillery pages.
 Size: a small feature, about the size of the rundown lists. News is a separate feature and comes after this one.
 
 ## What it is for
